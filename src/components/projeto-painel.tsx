@@ -1,12 +1,10 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { podeDefinirEstadoTerminal, podeRegistrarComite, podeVerNaoAplicaveis, podeEditarDiagnostico, podeAbrirRodada, podeRegistrarNaoAplicavel } from "@/domain/acesso";
+import { podeDefinirEstadoTerminal, podeVerNaoAplicaveis, podeEditarDiagnostico, podeAbrirRodada, podeRegistrarNaoAplicavel } from "@/domain/acesso";
 import { minimoSeContasseExcluidos } from "@/domain/calcularNivel";
 import {
   PERFIS,
-  type Nivel,
-  type OrgaoComite,
   type Perfil,
   type TipoAvaliacao,
 } from "@/domain/manuais";
@@ -21,7 +19,6 @@ import {
   marcarNaoAplicavel,
   nivelDaAvaliacao,
   padroesVisiveis,
-  registrarResolucao,
   retirarNaoAplicavel,
   type Avaliacao,
   type Projeto,
@@ -30,7 +27,6 @@ import {
   ROTULO_ESTADO,
   ROTULO_GRUPO,
   ROTULO_NIVEL,
-  ROTULO_ORGAO,
   ROTULO_PERFIL,
   ROTULO_TIPO,
   formatarData,
@@ -46,16 +42,9 @@ import { Separator } from "@/components/ui/separator";
 import { Textarea } from "@/components/ui/textarea";
 
 const TIPOS: TipoAvaliacao[] = ["certificacao", "manutencao", "recertificacao"];
-const ORGAOS: OrgaoComite[] = ["ACSA", "IBES"];
-const NIVEIS: Nivel[] = ["avancado", "otimo", "excelente"];
 
 const ITENS_PERFIL = Object.fromEntries(PERFIS.map((perfil) => [perfil, ROTULO_PERFIL[perfil]]));
 const ITENS_TIPO = Object.fromEntries(TIPOS.map((tipo) => [tipo, ROTULO_TIPO[tipo]]));
-const ITENS_ORGAO = Object.fromEntries(ORGAOS.map((orgao) => [orgao, ROTULO_ORGAO[orgao]]));
-const ITENS_NIVEL = {
-  nenhum: "Não informado",
-  ...Object.fromEntries(NIVEIS.map((nivel) => [nivel, ROTULO_NIVEL[nivel]])),
-};
 
 export function ProjetoPainel() {
   const [projeto, setProjeto] = useState<Projeto>(() => criarProjetoAmostra());
@@ -64,12 +53,6 @@ export function ProjetoPainel() {
   const [motivo, setMotivo] = useState("");
   const [erro, setErro] = useState<string | null>(null);
   const [rascunhoEvidencia, setRascunhoEvidencia] = useState<Record<string, string>>({});
-  const [orgao, setOrgao] = useState<OrgaoComite>("IBES");
-  const [dataComite, setDataComite] = useState("2026-10-26");
-  const [resultadoComite, setResultadoComite] = useState("");
-  const [pontuacao, setPontuacao] = useState("82");
-  const [nivelConcedido, setNivelConcedido] = useState<Nivel | "nenhum">("nenhum");
-  const [documento, setDocumento] = useState("");
 
   const avaliacao = projeto.avaliacoes.find((item) => item.id === avaliacaoId) ?? projeto.avaliacoes.at(-1)!;
   const resultado = useMemo(
@@ -463,140 +446,17 @@ export function ProjetoPainel() {
 
       <Card>
         <CardHeader>
-          <CardTitle className="font-heading text-2xl">Resolução do comitê</CardTitle>
+          <CardTitle className="font-heading text-2xl">Comitê de Certificação</CardTitle>
           <CardDescription>
-            Registro manual. Órgão ACSA ou IBES, data, resultado, pontuação, nível concedido e documento. Não há acesso externo à ACSA.
+            O comitê é do IBES. Parecer do membro e resolução ficam no banco. As telas entram na Fase 2.
           </CardDescription>
         </CardHeader>
-        <CardContent className="grid gap-4">
-          {projeto.resolucao ? (
-            <div className="rounded-lg bg-muted px-3 py-3 text-sm">
-              <p className="font-medium">
-                {ROTULO_ORGAO[projeto.resolucao.orgao]} · {formatarData(projeto.resolucao.data)} ·{" "}
-                {projeto.resolucao.resultado}
-              </p>
-              <p className="text-muted-foreground">
-                Pontuação {projeto.resolucao.pontuacao.toLocaleString("pt-BR")} · nível concedido{" "}
-                {projeto.resolucao.nivelConcedido
-                  ? ROTULO_NIVEL[projeto.resolucao.nivelConcedido]
-                  : "não informado"}{" "}
-                · {projeto.resolucao.documentoNome}
-              </p>
-            </div>
-          ) : (
-            <p className="text-sm text-muted-foreground">
-              Nenhuma resolução lançada. O nível calculado acima não preenche este registro.
-            </p>
-          )}
-          {podeRegistrarComite(perfil) ? (
-            <form
-              className="grid gap-3 md:grid-cols-2"
-              onSubmit={(evento) => {
-                evento.preventDefault();
-                agir(() =>
-                  registrarResolucao(projeto, {
-                    orgao,
-                    data: dataComite,
-                    resultado: resultadoComite,
-                    pontuacao: Number(pontuacao.replace(",", ".")),
-                    nivelConcedido: nivelConcedido === "nenhum" ? null : nivelConcedido,
-                    documentoNome: documento,
-                  }),
-                );
-              }}
-            >
-              <div className="grid gap-2">
-                <Label htmlFor="orgao">Órgão</Label>
-                <Select
-                  items={ITENS_ORGAO}
-                  value={orgao}
-                  onValueChange={(valor) => {
-                    if (valor) setOrgao(valor as OrgaoComite);
-                  }}
-                >
-                  <SelectTrigger id="orgao" className="w-full">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {ORGAOS.map((item) => (
-                      <SelectItem key={item} value={item}>
-                        {ROTULO_ORGAO[item]}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="grid gap-2">
-                <Label htmlFor="data-comite">Data</Label>
-                <Input
-                  id="data-comite"
-                  type="date"
-                  value={dataComite}
-                  onChange={(evento) => setDataComite(evento.target.value)}
-                  required
-                />
-              </div>
-              <div className="grid gap-2 md:col-span-2">
-                <Label htmlFor="resultado-comite">Resultado</Label>
-                <Input
-                  id="resultado-comite"
-                  value={resultadoComite}
-                  onChange={(evento) => setResultadoComite(evento.target.value)}
-                  placeholder="Texto da resolução, como foi lavrado"
-                  required
-                />
-              </div>
-              <div className="grid gap-2">
-                <Label htmlFor="pontuacao">Pontuação</Label>
-                <Input
-                  id="pontuacao"
-                  inputMode="decimal"
-                  value={pontuacao}
-                  onChange={(evento) => setPontuacao(evento.target.value)}
-                  required
-                />
-              </div>
-              <div className="grid gap-2">
-                <Label htmlFor="nivel-concedido">Nível concedido</Label>
-                <Select
-                  items={ITENS_NIVEL}
-                  value={nivelConcedido}
-                  onValueChange={(valor) => {
-                    if (valor) setNivelConcedido(valor as Nivel | "nenhum");
-                  }}
-                >
-                  <SelectTrigger id="nivel-concedido" className="w-full">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="nenhum">Não informado</SelectItem>
-                    {NIVEIS.map((nivel) => (
-                      <SelectItem key={nivel} value={nivel}>
-                        {ROTULO_NIVEL[nivel]}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="grid gap-2 md:col-span-2">
-                <Label htmlFor="documento-comite">Documento</Label>
-                <Input
-                  id="documento-comite"
-                  type="file"
-                  onChange={(evento) => setDocumento(evento.target.files?.[0]?.name ?? "")}
-                  required={!documento}
-                />
-                {documento ? <p className="text-sm text-muted-foreground">{documento}</p> : null}
-              </div>
-              <Button type="submit" className="md:col-span-2">
-                Gravar resolução
-              </Button>
-            </form>
-          ) : (
-            <p className="text-sm text-muted-foreground">
-              Este perfil consulta a resolução. Quem grava é admin IBES ou responsável IBES.
-            </p>
-          )}
+        <CardContent>
+          <p className="text-sm text-muted-foreground">
+            {perfil === "membro_comite"
+              ? "Membro do comitê já enxerga o projeto. O parecer, o voto e a decisão ainda não têm tela."
+              : "Nesta fase a tela não grava parecer nem resolução."}
+          </p>
         </CardContent>
       </Card>
 

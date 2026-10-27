@@ -32,10 +32,6 @@ export function podeAbrirRodada(perfil: Perfil): boolean {
   return !perfilInstituicao(perfil);
 }
 
-export function podeRegistrarComite(perfil: Perfil): boolean {
-  return podeDefinirEstadoTerminal(perfil);
-}
-
 export function estadoExigePerfilTerminal(estado: EstadoProjeto): boolean {
   return (ESTADOS_TERMINAIS as readonly EstadoProjeto[]).includes(estado);
 }

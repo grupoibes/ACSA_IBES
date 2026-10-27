@@ -22,10 +22,10 @@ on padroes_nao_aplicaveis
 for all
 to app_sessao
 using (
-  app.perfil_atual() in ('admin_ibes', 'responsavel_ibes', 'avaliador_ibes')
+  app.perfil_atual() in ('admin_ibes', 'responsavel_ibes', 'avaliador_ibes', 'membro_comite')
 )
 with check (
-  app.perfil_atual() in ('admin_ibes', 'responsavel_ibes', 'avaliador_ibes')
+  app.perfil_atual() in ('admin_ibes', 'responsavel_ibes', 'avaliador_ibes', 'membro_comite')
 );
 
 alter table historico_estados enable row level security;
@@ -75,7 +75,5 @@ on resolucoes_comite
 for insert
 to app_sessao
 with check (
-  app.perfil_atual() in ('admin_ibes', 'responsavel_ibes')
+  app.perfil_atual() in ('admin_ibes', 'responsavel_ibes', 'membro_comite')
 );
-
--- Não há role, chave ou policy para um acesso externo da ACSA.

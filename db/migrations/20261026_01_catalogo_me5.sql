@@ -64,6 +64,7 @@ begin
     'admin_ibes',
     'responsavel_ibes',
     'avaliador_ibes',
+    'membro_comite',
     'gestor_instituicao',
     'profissional_instituicao'
   ) then

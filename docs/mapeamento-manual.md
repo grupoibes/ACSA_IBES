@@ -1,6 +1,6 @@
-# Mapeamento ACSA
+# Mapeamento do manual
 
-Este arquivo registra o que o projeto usa do modelo ACSA e as respostas do IBES de 26/10/2026. A seção 5F é a fonte dessas respostas. A conciliação com o esquema está em [conciliacao.md](conciliacao.md).
+Este arquivo registra o manual importado pelo IBES e as respostas de 26/10/2026. A seção 5F é a fonte dessas respostas. A conciliação com o esquema está em [conciliacao.md](conciliacao.md). A decisão de 27/10 está em [decisoes-2026-10-27.md](decisoes-2026-10-27.md).
 
 ## 1. Dois manuais, dois papéis
 
@@ -47,7 +47,7 @@ Somente `admin_ibes` e `responsavel_ibes` fazem essa passagem. O trigger grava a
 
 ### 5F.5 Resolução do comitê
 
-Registro manual: órgão `ACSA` ou `IBES`, data, resultado, pontuação, nível concedido e documento. Não há credencial, fila nem acesso externo para a ACSA. O nível concedido não é preenchido pelo cálculo.
+Substituída em 27/10. O Comitê de Certificação é do IBES. O registro passa a ser `pareceres_comite` (membro, parecer, voto, data) e `resolucoes_comite` (decisão, pontuação, nível concedido, data, documento). As telas ficam na Fase 2. O nível concedido não é preenchido pelo cálculo.
 
 ### 5F.6 Ciclos
 

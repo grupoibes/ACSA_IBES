@@ -252,3 +252,131 @@ begin
 end $$;
 
 reset role;
+
+do $$
+begin
+  if exists (
+    select 1 from information_schema.columns
+    where table_schema = 'public' and table_name = 'resolucoes_comite' and column_name = 'orgao'
+  ) then
+    raise exception 'resolucoes_comite ainda tem orgao';
+  end if;
+
+  if not exists (
+    select 1 from information_schema.columns
+    where table_schema = 'public' and table_name = 'resolucoes_comite' and column_name = 'decisao'
+  ) or not exists (
+    select 1 from information_schema.columns
+    where table_schema = 'public' and table_name = 'resolucoes_comite' and column_name = 'documento'
+  ) then
+    raise exception 'resolucao sem decisao ou documento';
+  end if;
+end $$;
+
+do $$
+begin
+  begin
+    insert into lotes_importacao (meio, arquivo, formato_entrada)
+    values ('csv', 'manual.csv', 'layout-fechado');
+    raise exception 'formato_gravado';
+  exception
+    when check_violation then
+      null;
+    when raise_exception then
+      if sqlerrm = 'formato_gravado' then
+        raise exception 'formato de entrada foi decidido no banco';
+      end if;
+      raise;
+  end;
+
+  begin
+    insert into lotes_importacao (meio, arquivo)
+    values ('plataforma', 'origem');
+    raise exception 'meio_gravado';
+  exception
+    when check_violation then
+      null;
+    when raise_exception then
+      if sqlerrm = 'meio_gravado' then
+        raise exception 'meio fora de csv/json foi aceito';
+      end if;
+      raise;
+  end;
+end $$;
+
+select app.definir_perfil('membro_comite');
+set role app_sessao;
+
+insert into pareceres_comite (projeto_id, avaliacao_id, membro, parecer, voto, data)
+values (
+  '22222222-2222-4222-8222-222222222222',
+  '44444444-4444-4444-8444-444444444442',
+  '66666666-6666-4666-8666-666666666664',
+  'Os obrigatórios aplicáveis estão cumpridos e o Grupo II fecha o mínimo.',
+  'favoravel',
+  '2026-10-27'
+);
+
+insert into resolucoes_comite (
+  projeto_id, avaliacao_id, decisao, pontuacao, nivel_concedido, data, documento, registrado_por
+) values (
+  '22222222-2222-4222-8222-222222222222',
+  '44444444-4444-4444-8444-444444444442',
+  'Certificação Ótima concedida pelo comitê do IBES.',
+  82,
+  'otimo',
+  '2026-10-27',
+  'comite/serra-verde/resolucao.pdf',
+  '66666666-6666-4666-8666-666666666664'
+);
+
+do $$
+declare
+  sala integer;
+  pareceres integer;
+begin
+  select count(*) into sala
+  from app.padroes_do_projeto('22222222-2222-4222-8222-222222222222')
+  where codigo = '5.06.02' and nao_aplicavel;
+  select count(*) into pareceres from pareceres_comite;
+  if sala <> 1 or pareceres <> 1 then
+    raise exception 'membro do comitê não viu o padrão ou o parecer (sala %, pareceres %)', sala, pareceres;
+  end if;
+end $$;
+
+reset role;
+select app.definir_perfil('gestor_instituicao');
+set role app_sessao;
+
+do $$
+declare
+  n integer;
+begin
+  select count(*) into n from pareceres_comite;
+  if n <> 0 then
+    raise exception 'a instituição leu % pareceres', n;
+  end if;
+
+  begin
+    insert into pareceres_comite (projeto_id, avaliacao_id, membro, parecer, voto, data)
+    values (
+      '22222222-2222-4222-8222-222222222222',
+      '44444444-4444-4444-8444-444444444442',
+      '66666666-6666-4666-8666-666666666664',
+      'Parecer indevido',
+      'contra',
+      '2026-10-27'
+    );
+    raise exception 'parecer_gravado';
+  exception
+    when insufficient_privilege then
+      null;
+    when raise_exception then
+      if sqlerrm = 'parecer_gravado' then
+        raise exception 'gestor gravou parecer';
+      end if;
+      raise;
+  end;
+end $$;
+
+reset role;

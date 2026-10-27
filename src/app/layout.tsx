@@ -13,9 +13,9 @@ const heading = Newsreader({
 });
 
 export const metadata: Metadata = {
-  title: "UGC Farmácia — certificação ACSA",
+  title: "UGC Farmácia — certificação IBES",
   description:
-    "Projeto de certificação com as decisões do IBES de 26/10: padrões não aplicáveis, rodadas, estados e resolução manual do comitê.",
+    "Projeto de certificação do IBES: padrões não aplicáveis, rodadas, estados e comitê do IBES.",
 };
 
 export default function RootLayout({

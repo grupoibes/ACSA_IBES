@@ -1,26 +1,22 @@
--- Resolução do comitê é registro manual.
--- Não há credencial, fila ou acesso externo para a ACSA.
+-- Resolução do Comitê de Certificação do IBES.
+-- decisao, pontuacao, nivel_concedido, data e documento.
+-- As telas deste registro ficam para a Fase 2.
 
 create table resolucoes_comite (
   id uuid primary key default gen_random_uuid(),
   projeto_id uuid not null references projetos (id),
   avaliacao_id uuid not null references avaliacoes (id),
-  orgao text not null check (orgao in ('ACSA', 'IBES')),
-  data date not null,
-  resultado text not null check (length(btrim(resultado)) > 0),
+  decisao text not null check (length(btrim(decisao)) > 0),
   pontuacao numeric(5, 2) not null check (pontuacao >= 0 and pontuacao <= 100),
   nivel_concedido text check (nivel_concedido in ('avancado', 'otimo', 'excelente')),
-  documento_nome text not null,
-  documento_caminho text not null,
+  data date not null,
+  documento text not null check (length(btrim(documento)) > 0),
   registrado_por uuid not null references usuarios (id),
-  criado_em timestamptz not null default now(),
-  constraint resolucoes_documento check (
-    length(btrim(documento_nome)) > 0 and length(btrim(documento_caminho)) > 0
-  )
+  criado_em timestamptz not null default now()
 );
 
 comment on table resolucoes_comite is
-  'Registro manual da resolução (órgão ACSA ou IBES, data, resultado, pontuação, nível concedido e documento). Sem integração externa com a ACSA.';
+  'Decisão do Comitê de Certificação do IBES: decisao, pontuacao, nivel_concedido, data e documento. Tela na Fase 2.';
 
 create or replace function app.resolucao_da_mesma_avaliacao()
 returns trigger

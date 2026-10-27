@@ -1,6 +1,6 @@
 # Respostas IBES
 
-Rodada de 26/10/2026. O que foi respondido está aplicado na seção 5F de [mapeamento-acsa.md](mapeamento-acsa.md) e conciliado em [conciliacao.md](conciliacao.md).
+Rodada de 26/10/2026, revista em 27/10 no comitê. O que foi respondido está aplicado na seção 5F de [mapeamento-manual.md](mapeamento-manual.md) e conciliado em [conciliacao.md](conciliacao.md).
 
 ## Aplicadas
 
@@ -8,7 +8,7 @@ Rodada de 26/10/2026. O que foi respondido está aplicado na seção 5F de [mape
 2. Diagnóstico: avaliador, data e anexo do relatório. Digitalização é v2.
 3. Reavaliação na `avaliacoes.rodada` (1..n), com evidências acumuladas.
 4. `recusado` e `abandonado` só por `admin_ibes` e `responsavel_ibes`, sempre em `historico_estados`.
-5. Resolução do comitê manual, órgão ACSA ou IBES, sem acesso externo para a ACSA.
+5. Resolução do comitê, substituída em 27/10: o comitê é do IBES. Parecer (`membro`, `parecer`, `voto`, `data`) e resolução (`decisao`, `pontuacao`, `nivel_concedido`, `data`, `documento`). Telas na Fase 2.
 6. Tipo `certificacao`, `manutencao` ou `recertificacao`. Manutenção só nos Grupos I e II aplicáveis.
 7. Contagens pelo ME 5 1_07. ME 2 1_05 e 144 padrões são referência de estrutura.
 

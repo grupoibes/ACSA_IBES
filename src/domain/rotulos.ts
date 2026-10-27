@@ -2,7 +2,6 @@ import type {
   EstadoProjeto,
   Grupo,
   Nivel,
-  OrgaoComite,
   Perfil,
   TipoAvaliacao,
 } from "@/domain/manuais";
@@ -11,6 +10,7 @@ export const ROTULO_PERFIL: Record<Perfil, string> = {
   admin_ibes: "Admin IBES",
   responsavel_ibes: "Responsável IBES",
   avaliador_ibes: "Avaliador IBES",
+  membro_comite: "Membro do comitê",
   gestor_instituicao: "Gestor da instituição",
   profissional_instituicao: "Profissional da instituição",
 };
@@ -42,11 +42,6 @@ export const ROTULO_GRUPO: Record<Grupo, string> = {
   I: "Grupo I",
   II: "Grupo II",
   III: "Grupo III",
-};
-
-export const ROTULO_ORGAO: Record<OrgaoComite, string> = {
-  ACSA: "ACSA",
-  IBES: "IBES",
 };
 
 export function formatarData(isoDate: string): string {

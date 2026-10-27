@@ -12,8 +12,6 @@ import {
   MANUAL_OPERACIONAL,
   type EstadoProjeto,
   type Grupo,
-  type Nivel,
-  type OrgaoComite,
   type OrigemNaoAplicavel,
   type Perfil,
   type TipoAvaliacao,
@@ -63,15 +61,6 @@ export interface HistoricoEstado {
   em: string;
 }
 
-export interface ResolucaoComite {
-  orgao: OrgaoComite;
-  data: string;
-  resultado: string;
-  pontuacao: number;
-  nivelConcedido: Nivel | null;
-  documentoNome: string;
-}
-
 export interface Projeto {
   id: string;
   instituicao: string;
@@ -85,7 +74,6 @@ export interface Projeto {
   padroes: PadraoCatalogo[];
   avaliacoes: Avaliacao[];
   evidencias: Evidencia[];
-  resolucao: ResolucaoComite | null;
 }
 
 export function criarProjetoAmostra(): Projeto {
@@ -218,7 +206,6 @@ export function criarProjetoAmostra(): Projeto {
         criadaEm: "2026-10-03T17:05:00-03:00",
       },
     ],
-    resolucao: null,
   };
 }
 
@@ -385,22 +372,6 @@ export function retirarNaoAplicavel(projeto: Projeto, perfil: Perfil, padraoId: 
   return {
     ...projeto,
     naoAplicaveis: projeto.naoAplicaveis.filter((item) => item.padraoId !== padraoId),
-  };
-}
-
-export function registrarResolucao(projeto: Projeto, resolucao: ResolucaoComite): Projeto {
-  if (!resolucao.resultado.trim()) throw new Error("informe o resultado");
-  if (!resolucao.documentoNome.trim()) throw new Error("anexe o documento da resolução");
-  if (!Number.isFinite(resolucao.pontuacao) || resolucao.pontuacao < 0 || resolucao.pontuacao > 100) {
-    throw new Error("a pontuação fica entre 0 e 100");
-  }
-  return {
-    ...projeto,
-    resolucao: {
-      ...resolucao,
-      resultado: resolucao.resultado.trim(),
-      documentoNome: resolucao.documentoNome.trim(),
-    },
   };
 }
 

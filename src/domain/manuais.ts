@@ -11,6 +11,7 @@ export const PERFIS = [
   "admin_ibes",
   "responsavel_ibes",
   "avaliador_ibes",
+  "membro_comite",
   "gestor_instituicao",
   "profissional_instituicao",
 ] as const;
@@ -44,8 +45,6 @@ export type EstadoProjeto =
 export const ESTADOS_TERMINAIS = ["recusado", "abandonado"] as const satisfies readonly EstadoProjeto[];
 
 export type Nivel = "avancado" | "otimo" | "excelente";
-
-export type OrgaoComite = "ACSA" | "IBES";
 
 /** Única origem admitida em 26/10. Outra origem exige decisão nova do IBES. */
 export type OrigemNaoAplicavel = "diagnostico";

@@ -1,6 +1,6 @@
-# Conciliação das respostas de 26/10
+# Conciliação
 
-Cada linha liga a resposta da [seção 5F](mapeamento-acsa.md) ao banco, à função e à tela. A amostra do Hospital Serra Verde, UGC Farmácia, é o caso usado nos testes: o padrão `5.06.02` está não aplicável por diagnóstico; o Grupo II aplicável fica 1 de 2, mínimo 1, e a rodada 2 de certificação calcula Ótima. Se esse padrão voltasse ao denominador sem estar cumprido, o mínimo do grupo passaria a 2 e o nível cairia para Avançada.
+Cada linha liga a resposta da [seção 5F](mapeamento-manual.md) ao banco, à função e à tela. A decisão de 27/10 está em [decisoes-2026-10-27.md](decisoes-2026-10-27.md). A amostra do Hospital Serra Verde, UGC Farmácia, é o caso usado nos testes: o padrão `5.06.02` está não aplicável por diagnóstico; o Grupo II aplicável fica 1 de 2, mínimo 1, e a rodada 2 de certificação calcula Ótima. Se esse padrão voltasse ao denominador sem estar cumprido, o mínimo do grupo passaria a 2 e o nível cairia para Avançada.
 
 | Resposta | Onde ficou |
 | --- | --- |
@@ -12,7 +12,7 @@ Cada linha liga a resposta da [seção 5F](mapeamento-acsa.md) ao banco, à fun�
 | Rodada 1..n | `avaliacoes (projeto_id, rodada)` com `rodada >= 1`. |
 | Evidências acumulam | `evidencias` não tem chave que substitua a anterior. Trigger de `DELETE` recusa a exclusão. A rodada nova nasce com conformidade vazia. |
 | recusado / abandonado | Trigger `registrar_mudanca_estado`. Só `admin_ibes` e `responsavel_ibes`. Toda mudança de estado, inclusive essas, insere em `historico_estados` com perfil e motivo. |
-| Resolução manual | `resolucoes_comite`: `orgao` ACSA ou IBES, data, resultado em texto, pontuação, `nivel_concedido`, documento. Insert só para admin e responsável IBES. Nenhuma tabela de integração. |
+| Resolução manual, revista em 27/10 | O Comitê de Certificação é do IBES. `resolucoes_comite` guarda `decisao`, `pontuacao`, `nivel_concedido`, `data` e `documento`. Não há coluna de órgão. `pareceres_comite` guarda `membro`, `parecer`, `voto` e `data`, com perfil `membro_comite`. Quem grava parecer é `membro_comite`. A resolução pode ser gravada por `admin_ibes`, `responsavel_ibes` ou `membro_comite`. A instituição lê a resolução e não lê o parecer. Telas na Fase 2. |
 | Tipo do ciclo | `avaliacoes.tipo`: `certificacao`, `manutencao`, `recertificacao`. |
 | Manutenção só Grupos I e II aplicáveis | Grupo III recebe `no_escopo = false` e não entra no nível. O cálculo não devolve Excelente. A tela tira esses padrões da lista da instituição. |
 | Contagem ME 5 1_07 | `calcular_nivel` recusa outro código. `manuais` recusa ME 2 1_05. O 144 está só em `referencias_estrutura`. |
@@ -25,10 +25,12 @@ Cada linha liga a resposta da [seção 5F](mapeamento-acsa.md) ao banco, à fun�
 | `db/migrations/20261026_02_projeto_diagnostico.sql` | Projeto, diagnóstico e não aplicáveis. |
 | `db/migrations/20261026_03_avaliacoes_rodada.sql` | Rodada, conformidade sem Ausente, evidência que não se apaga. |
 | `db/migrations/20261026_04_historico_estados.sql` | Estados terminais e histórico. |
-| `db/migrations/20261026_05_resolucao_comite.sql` | Resolução manual. |
+| `db/migrations/20261026_05_resolucao_comite.sql` | Resolução do comitê do IBES: decisão, pontuação, nível, data e documento. |
 | `db/migrations/20261026_06_rls.sql` | Papel `app_sessao` e policies. |
 | `db/migrations/20261026_07_calcular_nivel.sql` | Nível e lista visível por perfil. |
 | `db/migrations/20261026_08_amostra.sql` | Doze padrões de demonstração e o projeto Serra Verde. Não é o catálogo oficial. |
+| `db/migrations/20261027_01_comite_ibes.sql` | Perfil `membro_comite`, pareceres e alinhamento da resolução. |
+| `db/migrations/20261027_02_importacao_arquivos.sql` | Lote de CSV ou JSON exportado, com anexos. Formato de entrada nulo, PENDENTE IBES. |
 
 `db/test/decisoes.sql` percorre a amostra: nível Ótima, Grupo II com mínimo 1 em vez de 2, lista vazia de não aplicáveis para o gestor, recusa de estado terminal, evidência que não some, origem diferente de `diagnostico` rejeitada e Grupo III fora da manutenção.
 
@@ -38,12 +40,16 @@ A função TypeScript em `src/domain/calcularNivel.ts` segue a mesma conta. `npm
 
 Não são respostas novas do IBES. São o mínimo para a seção 5F funcionar, e estão abertas a correção:
 
-- O resultado do comitê é texto livre. Não há lista fechada de resultados.
+- A decisão do comitê é texto livre. Não há lista fechada de decisões, nem de votos.
 - `nivel_concedido` pode ficar vazio e não precisa coincidir com o nível calculado.
 - A conformidade da rodada anterior não é copiada. O que acumula é a evidência.
 - O limiar do Grupo III no ME 5 1_07 está em 70%, o valor do programa anterior ao ME 5 1_08. Trocar o número é um update em `manuais`, não uma mudança da função.
-- Perfis da instituição, neste código: `gestor_instituicao` e `profissional_instituicao`. Perfis IBES: `admin_ibes`, `responsavel_ibes`, `avaliador_ibes`.
+- Perfis da instituição, neste código: `gestor_instituicao` e `profissional_instituicao`. Perfis IBES: `admin_ibes`, `responsavel_ibes`, `avaliador_ibes`, `membro_comite`.
+
+## Importação
+
+O manual continua importado pelo IBES, a partir de arquivo exportado em CSV ou JSON e da pasta de anexos. `lotes_importacao.meio` aceita só `csv` ou `json`. `formato_entrada` fica nulo: o formato está **PENDENTE IBES** e a constraint recusa qualquer layout preenchido. Não há função de leitura da plataforma atual.
 
 ## Pendências 21 a 28
 
-Permanecem `PENDENTE IBES` em [respostas-ibes.md](respostas-ibes.md). Nenhuma migração, policy ou ramo de `calcularNivel` escolhe uma delas.
+Permanecem `PENDENTE IBES` em [respostas-ibes.md](respostas-ibes.md). Nenhuma migração, policy ou ramo de `calcularNivel` escolhe uma delas. O formato de entrada da importação também está PENDENTE IBES.
