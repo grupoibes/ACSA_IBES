@@ -1,26 +1,25 @@
 "use client";
 
-import Script from "next/script";
 import { useEffect } from "react";
 
-/** Evita o flash da moldura interna antes do script saber se há sessão de teste. */
-function marcarEntrada() {
-  try {
-    const salvo = JSON.parse(localStorage.getItem("acsas-ibes-modern-v5") || "null");
-    if (!salvo?.logado) document.documentElement.classList.add("pre");
-  } catch {
-    document.documentElement.classList.add("pre");
+declare global {
+  interface Window {
+    __acsasV03?: boolean;
   }
 }
 
 export function AcsasApp() {
   useEffect(() => {
-    marcarEntrada();
+    if (window.__acsasV03 || document.querySelector('script[data-acsas="v03"]')) return;
+    const script = document.createElement("script");
+    script.src = "/acsas-v03.js";
+    script.async = false;
+    script.dataset.acsas = "v03";
+    document.body.appendChild(script);
   }, []);
 
   return (
     <>
-      <script dangerouslySetInnerHTML={{ __html: `(${marcarEntrada.toString()})()` }} />
       <div id="entrada" />
       <header className="top">
         <div className="brand">
@@ -64,7 +63,6 @@ export function AcsasApp() {
       </div>
       <div id="scrim-root" />
       <div className="toasts" id="toasts" aria-live="polite" />
-      <Script src="/acsas-v03.js" strategy="afterInteractive" />
     </>
   );
 }
