@@ -1,21 +1,23 @@
 import type { Metadata } from "next";
-import { Newsreader, Source_Sans_3 } from "next/font/google";
+import { IBM_Plex_Mono, IBM_Plex_Sans } from "next/font/google";
 import "./globals.css";
+import "./ibes.css";
 
-const sans = Source_Sans_3({
-  variable: "--font-source",
+const sans = IBM_Plex_Sans({
+  variable: "--font-plex",
   subsets: ["latin"],
+  weight: ["400", "500", "600"],
 });
 
-const heading = Newsreader({
-  variable: "--font-newsreader",
+const mono = IBM_Plex_Mono({
+  variable: "--font-plex-mono",
   subsets: ["latin"],
+  weight: ["500"],
 });
 
 export const metadata: Metadata = {
-  title: "UGC Farmácia — certificação IBES",
-  description:
-    "Projeto de certificação do IBES: padrões não aplicáveis, rodadas, estados e comitê do IBES.",
+  title: "ACSAS IBES MODERN",
+  description: "Plataforma de acreditação do IBES. Beta v0.3, ambiente de homologação, dados fictícios.",
 };
 
 export default function RootLayout({
@@ -24,8 +26,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="pt-BR">
-      <body className={`${sans.variable} ${heading.variable} antialiased`}>{children}</body>
+    <html lang="pt-BR" data-theme="light">
+      <body className={`${sans.variable} ${mono.variable}`}>{children}</body>
     </html>
   );
 }

@@ -1,0 +1,121 @@
+---
+description: Formato de interface do ACSAS IBES MODERN (identidade GRUPO IBES). Aplicar em toda tela, componente e estilo.
+globs: ["src/app/**/*.tsx", "src/components/**/*.tsx", "src/app/**/*.css", "app/**/*.tsx", "components/**/*.tsx"]
+alwaysApply: true
+---
+
+# Interface ACSAS IBES MODERN · identidade GRUPO IBES
+
+Referência visual e funcional: `referencia/prototipo-v0.3.html` (abra no navegador). Em caso de dúvida, o protótipo vence esta regra só em layout; regra de negócio vem do prompt principal.
+
+## 1. Marca
+
+- Emblema oficial: `public/brand/ibes-emblema.png` (2172 × 724, fundo transparente). É o arquivo definitivo: não pedir upload ao usuário nem criar tela de troca de logotipo.
+- Fundo oficial das páginas: `public/brand/ibes-fundo.jpg` (1672 × 941, original em `ibes-fundo.png`).
+- **Tela de entrada:** logotipo grande (até 380 px de largura), centralizado, com espaço livre ao redor.
+- **Páginas internas:** logotipo no canto superior esquerdo, 52 px de altura.
+- Nunca esticar, recortar, recolorir, aplicar filtro, redesenhar em SVG/CSS ou trocar por ícone genérico. Use `next/image` com `width`/`height` proporcionais (2172 × 724).
+- No tema escuro, o logotipo fica sobre placa branca (`--logo-bg`), raio 8 px.
+- Nada da ACSA na interface: sem layout, cores, ícones ou nomes da plataforma Excelência. Documentos gerados (relatório, certificado) saem só com a marca IBES.
+
+## 2. Tokens (copiar para `app/globals.css`)
+
+Tema claro é o padrão. Escuro existe, mas a decisão de travar em claro está pendente com o Ricardo.
+
+```css
+:root {
+  --brand-900:#872052; --brand-700:#9C3A6E; --brand-600:#B5487F; --brand-100:#FCF1F6; --brand-050:#FFFBFD;
+  --canvas:#FFFDFE; --surface:#FFFFFF; --line:#F1E6EC; --line-strong:#E2CFD9;
+  --ink:#29212A; --muted:#6F6570; --on-brand:#FFFFFF;
+  --ok:#237A52; --ok-soft:#E3F2EA; --pend:#6F6570; --pend-soft:#F3EDF1;
+  --warn:#98600B; --warn-soft:#FBF0DC; --bad:#B4233A; --bad-soft:#FBE6EA; --info:#5B5FA8; --info-soft:#ECECF7;
+  --eixo-1:#C9731F; --eixo-2:#B83A33; --eixo-3:#7449A8; --eixo-4:#2A78B8; --eixo-5:#2B8550;
+  --radius-sm:8px; --radius:14px; --radius-lg:22px; --focus:#B5487F;
+  --shadow:0 6px 24px rgba(127,36,88,.05); --logo-bg:transparent;
+  --hdr:linear-gradient(135deg,#FDF5F9 0%,#FFFFFF 60%,#FBF0F5 100%);
+  --page-bg:linear-gradient(rgba(255,255,255,.28),rgba(255,255,255,.28)), url('/brand/ibes-fundo.jpg');
+  --f-sans:'IBM Plex Sans',system-ui,-apple-system,'Segoe UI',sans-serif;
+  --f-mono:'IBM Plex Mono',ui-monospace,Consolas,monospace;
+}
+:root[data-theme="dark"] {
+  --brand-900:#2A1220; --brand-700:#F0A9CB; --brand-600:#E07FB0; --brand-100:#3A1C2D; --brand-050:#231520;
+  --canvas:#170F15; --surface:#1F151C; --line:#3A2834; --line-strong:#56404D;
+  --ink:#F3E8EE; --muted:#B8A6B1; --on-brand:#1B0F16;
+  --ok:#6CCB98; --ok-soft:#13301F; --pend:#B8A6B1; --pend-soft:#2A1F27;
+  --warn:#F0B45E; --warn-soft:#33240F; --bad:#F28A98; --bad-soft:#3A1519; --info:#A9ACF0; --info-soft:#24264A;
+  --focus:#E07FB0; --shadow:none; --logo-bg:#FFFFFF;
+  --hdr:linear-gradient(135deg,#2A1622 0%,#1F151C 55%,#2E1626 100%);
+  --page-bg:linear-gradient(160deg,#2A1622 0%,#170F15 60%);
+  color-scheme:dark;
+}
+body { background-color: var(--canvas); background-image: var(--page-bg); background-size: cover; background-position: center; background-attachment: fixed; background-repeat: no-repeat; min-height: 100vh; color: var(--ink); font-family: var(--f-sans); font-size:14px; line-height:1.5; }
+```
+
+No `tailwind.config`, mapeie as cores para essas variáveis (`brand: { 900:'var(--brand-900)', ... }`, `ok`, `warn`, `bad`, `info`, `ink`, `muted`, `line`) e use só as classes mapeadas. **Proibido cor literal em componente.**
+
+Fontes: IBM Plex Sans (400, 500, 600) e IBM Plex Mono (500) via `next/font/google`. Mono só para códigos de padrão (`ES 5 10.06_01`), códigos de projeto (`2025/009`) e números de resolução.
+
+### Fundo
+- Toda página (inclusive a tela de entrada) usa o fundo oficial em `cover`, fixo, com véu branco de 28% para não competir com o conteúdo.
+- Conteúdo de leitura fica sempre em quadros brancos (`--surface`); nunca texto longo direto sobre as ondas rosa.
+- No tema escuro o fundo vira o degradê vinho (`--page-bg` escuro), sem a imagem.
+
+## 3. Estrutura da página
+
+```
+┌ Cabeçalho (fundo --hdr, borda inferior --line) ─────────────────────────┐
+│ [logo 52px] ACSAS IBES MODERN [Beta] [Homologação]   Perfil ▾   [Sair] │
+│ Início · Avaliações · Manutenção · Testes        ← linha própria < 1700px │
+├ Faixa de contexto (superfície 70% opaca) ───────────────────────────────┤
+│ Projetos / Projeto 2025/009 / Tela        2025/009 · Instituição [Etapa] │
+├──────────────┬──────────────────────────────────────────────────────────┤
+│ Menu do      │  Título h1 + descrição curta          [ação principal]    │
+│ projeto      │  Avisos (restrição, bloqueio)                             │
+│ 264px        │  Quadros (sec) em grid 1 ou 2 colunas, gap 24px           │
+│ sticky       │  max-width 1320px, padding 24px                           │
+└──────────────┴──────────────────────────────────────────────────────────┘
+```
+
+- **Menu principal nunca corta opção:** `flex-wrap`, sem rolagem horizontal escondida. Abaixo de 1700 px o menu desce para linha própria com borda superior.
+- **Menu do projeto** em 3 grupos: Projeto (Ficha, Diagnóstico e escopo só IBES, Workflow e prazos, Usuários, Indicadores, Painel de log), Autoavaliação (Painel, Ficha, Biblioteca, Atribuição por critério, Planos de ação, Relatórios), Avaliação (Agendamento e relatório, Comitê de Certificação). Item ativo: fundo `--brand-100`, texto `--brand-700`, barra interna de 3 px `--brand-600` à esquerda. Selos à direita (pendentes, "bloq.", "na fila", "venc.").
+- Abaixo de 900 px o menu do projeto vira gaveta (botão "Menu do projeto" na faixa de contexto, fundo escurecido, Esc fecha).
+- Gutter lateral mínimo de 16 px com `max(16px, env(safe-area-inset-left))`.
+
+## 4. Componentes
+
+| Componente | Especificação |
+|---|---|
+| **Quadro (sec)** | Fundo `--surface`, borda `--line`, raio 14 px, sombra `--shadow`. Cabeçalho 44 px com degradê `--brand-050 → --surface`, título 15 px 600 em `--brand-700`, selo de contagem à direita. Corpo padding 16 px ou `flush` para tabelas. |
+| **Botão primário** | Fundo `--brand-600`, texto `--on-brand`, altura 36 px (44 px abaixo de 900 px), raio 8 px. Hover `--brand-700`. |
+| **Botão secundário** | Fundo `--surface`, borda `--line-strong`; hover borda `--brand-600`. |
+| **Botão Cumpre** | Fundo `--ok`, texto branco, ícone ✓. Desabilitado até a regra liberar, com frase explicando o que falta. |
+| **Selo (chip)** | 22 px de altura, raio 8 px, 12 px 600. Pares fundo/texto: ok, warn, bad, info, neutro (`--pend-soft`/`--ink`). Status do padrão em mono: `C`, `PTE`, `NA` (NA com borda tracejada). |
+| **Lista chave-valor (kv)** | Grid auto-fit 200 px; rótulo 12 px 500 `--muted`; valor 14 px. |
+| **Tabela** | Cabeçalho 36 px fundo `--brand-050`, 12 px 600 `--muted`; linhas 44 px; números alinhados à direita com `tabular-nums`; rolagem horizontal **dentro** do quadro. |
+| **Formulário** | Fundo `--canvas` com borda superior; rótulo sempre visível; "*" para obrigatório; erro em `--bad` logo abaixo do campo; foco com anel 2 px `--focus`. |
+| **Aviso (note)** | Faixa com traço inicial de 12 × 2 px; variantes info, warn, ok. Use para restrição de 5 semanas, bloqueio de etapa e regras provisórias. |
+| **Linha do tempo** | Etapa realizada: círculo **verde** `--ok` com ✓ e linha verde. Atual: anel `--brand-600`. Futura: **cinza** `--line-strong`. Texto abaixo: "Realizada dd/mm/aaaa" ou "Prazo dd/mm/aaaa". |
+| **Workflow** | Linhas com número/✓, nome, situação e campo de prazo; linha atual com fundo `--brand-050`. |
+| **Cadeia da evidência** | `[Enviada] → Conferida por X dd/mm hh:mm → Chancelada por Y dd/mm hh:mm`; devolução com motivo em aviso warn. |
+| **Nível** | 3 pontos (●○○ Avançado, ●●○ Ótimo, ●●● Excelente) + nome. |
+| **Barras de relatório** | Trilho `--pend-soft` 14 px, preenchimento `--brand-600`, marca vertical `--ink` no mínimo exigido, valor `n/total · %` à direita. |
+| **Toast** | Canto inferior direito, fundo `--ink`, texto `--surface`, 3,4 s, `aria-live="polite"`. Frase diz o que aconteceu ("Evidência chancelada"). |
+| **Cor do bloco** | Quadrado 10 px `--eixo-1..5` antes do nome do bloco/critério. |
+
+## 5. Estados e texto
+
+- Nunca comunicar estado só por cor: sempre selo com palavra.
+- Mapa de selos: Chancelada/Cumpre/Ativo/Dentro da meta = ok · Enviada/Pendente/Atenção/Vence em N dias = warn · Devolvida/Vencida/Não cumpre/Negativa = bad · Conferida/Etapa atual = info.
+- Fases encerradas abrem em **modo leitura**, nunca somem.
+- Botão sem permissão: desabilitado + aviso info "Somente X faz isso".
+- Ação em lote (ex.: marcar 126 padrões) exige confirmação **na própria página** e grava auditoria.
+- Textos em português do Brasil, voz ativa, botão diz o que faz ("Registrar parecer", "Abrir rodada 2"). Erro explica o que falta e como resolver.
+- Datas `dd/mm/aaaa`, data e hora `dd/mm/aaaa hh:mm`, percentuais com vírgula (`97,9%`).
+
+## 6. Responsivo e acessibilidade
+
+- Pontos de quebra: 1700 px (menu em linha própria), 900 px (menu do projeto vira gaveta, botões 44 px), 640 px (cabeçalho empilha).
+- Página nunca rola na horizontal; só tabelas rolam dentro do quadro.
+- Contraste mínimo AA; foco visível em todo controle; navegação completa por teclado; `prefers-reduced-motion` desliga animações.
+- Todo campo com `label` ligado por `id`; ícones decorativos com `aria-hidden`.
+- Esqueleto de carregamento (blocos `--line` pulsando) só em trocas de tela, nunca acima de 300 ms de atraso artificial.

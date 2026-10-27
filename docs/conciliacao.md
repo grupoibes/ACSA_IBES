@@ -1,5 +1,7 @@
 # Conciliação
 
+A tela em execução é o Beta v0.3 (`referencia/prototipo-v0.3.html`, regras em `src/lib/regras`). O prompt está em [prompt-v0.3.md](prompt-v0.3.md). Hospital, pessoas e textos de padrão dessa tela são fictícios. O motor SQL da amostra Serra Verde, descrito abaixo, continua com o limiar de 26/10.
+
 Cada linha liga a resposta da [seção 5F](mapeamento-manual.md) ao banco, à função e à tela. A decisão de 27/10 está em [decisoes-2026-10-27.md](decisoes-2026-10-27.md). A amostra do Hospital Serra Verde, UGC Farmácia, é o caso usado nos testes: o padrão `5.06.02` está não aplicável por diagnóstico; o Grupo II aplicável fica 1 de 2, mínimo 1, e a rodada 2 de certificação calcula Ótima. Se esse padrão voltasse ao denominador sem estar cumprido, o mínimo do grupo passaria a 2 e o nível cairia para Avançada.
 
 | Resposta | Onde ficou |
@@ -31,6 +33,7 @@ Cada linha liga a resposta da [seção 5F](mapeamento-manual.md) ao banco, à fu
 | `db/migrations/20261026_08_amostra.sql` | Doze padrões de demonstração e o projeto Serra Verde. Não é o catálogo oficial. |
 | `db/migrations/20261027_01_comite_ibes.sql` | Perfil `membro_comite`, pareceres e alinhamento da resolução. |
 | `db/migrations/20261027_02_importacao_arquivos.sql` | Lote de CSV ou JSON exportado, com anexos. Formato de entrada nulo, PENDENTE IBES. |
+| `db/migrations/20261027_03_auditoria_regras_nivel.sql` | `auditoria` só com insert. `regras_nivel` com a tabela do v0.3 (Grupo III em 40%). PENDÊNCIA 30: `calcular_nivel` ainda não lê essa tabela. |
 
 `db/test/decisoes.sql` percorre a amostra: nível Ótima, Grupo II com mínimo 1 em vez de 2, lista vazia de não aplicáveis para o gestor, recusa de estado terminal, evidência que não some, origem diferente de `diagnostico` rejeitada e Grupo III fora da manutenção.
 
@@ -50,6 +53,12 @@ Não são respostas novas do IBES. São o mínimo para a seção 5F funcionar, e
 
 O manual continua importado pelo IBES, a partir de arquivo exportado em CSV ou JSON e da pasta de anexos. `lotes_importacao.meio` aceita só `csv` ou `json`. `formato_entrada` fica nulo: o formato está **PENDENTE IBES** e a constraint recusa qualquer layout preenchido. Não há função de leitura da plataforma atual.
 
+## Beta v0.3
+
+A tela segue o protótipo: emblema e fundo oficiais, entrada por perfil de teste, índice de projetos, ficha, workflow, autoavaliação, evidência, avaliação, comitê e roteiro de testes. Os percentuais exibidos são os de `regras_nivel` (Avançado 70% no Grupo I, Ótimo com 40% no Grupo II, Excelente com 40% no Grupo III) e o mínimo arredonda para cima. O caso 139/142 aparece como 97,9% em `src/lib/regras/nivel.ts`.
+
+O Supabase em São Paulo, o login por senha e os dois ambientes na Vercel ficam para quando houver credencial. Nesta homologação local o acesso é o seletor de perfil, e o estado fica no navegador.
+
 ## Pendências 21 a 28
 
-Permanecem `PENDENTE IBES` em [respostas-ibes.md](respostas-ibes.md). Nenhuma migração, policy ou ramo de `calcularNivel` escolhe uma delas. O formato de entrada da importação também está PENDENTE IBES.
+Permanecem `PENDENTE IBES` em [respostas-ibes.md](respostas-ibes.md). O formato de entrada da importação também está PENDENTE IBES. O prompt v0.3 acrescenta as pendências 12, 19, 29, 30 e 33, que a tela marca e não decide.

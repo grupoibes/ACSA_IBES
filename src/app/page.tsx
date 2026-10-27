@@ -1,5 +1,5 @@
-import { ProjetoPainel } from "@/components/projeto-painel";
+import { AcsasApp } from "@/components/acsas-app";
 
 export default function Home() {
-  return <ProjetoPainel />;
+  return <AcsasApp />;
 }

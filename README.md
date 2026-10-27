@@ -1,17 +1,6 @@
-# Certificação IBES
+# ACSAS IBES MODERN
 
-Projeto da UGC Farmácia do Hospital Serra Verde. O manual operacional é o **ME 5 1_07**, importado pelo IBES. O mapeamento **ME 2 1_05**, de **144 padrões**, aparece só como referência de estrutura. O catálogo carregado tem 12 padrões de demonstração (`catalogo_oficial = false`).
-
-## O que a tela faz
-
-- Esconde padrão não aplicável do gestor e do profissional da instituição, e mostra a origem `diagnostico` para os perfis IBES, inclusive o membro do comitê.
-- Recalcula Avançada, Ótima e Excelente sem esses padrões no total e no mínimo.
-- Na manutenção, tira o Grupo III do cálculo.
-- Abre a rodada seguinte sem apagar evidência.
-- Recusa `recusado` e `abandonado` para quem não é admin IBES ou responsável IBES, e grava o histórico quando a passagem é válida.
-- Reserva o Comitê de Certificação ao IBES. Parecer e resolução estão no banco. As telas entram na Fase 2.
-
-As pendências 21 a 28 e o formato de entrada da importação estão **PENDENTE IBES**.
+Plataforma de acreditação do IBES, Beta v0.3. A tela em execução reproduz o protótipo navegável: identidade do GRUPO IBES, projeto fictício `2025/009` do Hospital Modelo de Demonstração e o manual de demonstração. Definições de padrão nessa tela são texto fictício. O catálogo oficial entra por importação do IBES.
 
 ## Rodar
 
@@ -21,19 +10,25 @@ npm test
 npm run dev
 ```
 
-A aplicação sobe em [http://127.0.0.1:4317](http://127.0.0.1:4317).
+A aplicação sobe em [http://127.0.0.1:4317](http://127.0.0.1:4317). Na entrada, escolha um perfil de teste. Não há senha nesta homologação: o login do Supabase entra quando houver credencial.
 
-As migrações são SQL puro, em `db/migrations`. Com PostgreSQL local:
+Para conferir o banco local:
 
 ```bash
 npm run test:sql
 ```
 
-Isso recria o banco `certificacao_ibes`, aplica as migrações e confere as decisões.
+## O que está nesta entrega
+
+- Emblema e fundo oficiais, cabeçalho, menu do projeto e as telas do protótipo v0.3.
+- Regras de nível e de permissão em `src/lib/regras`, com teste. O caso conhecido 139/142 aparece como 97,9%. Na manutenção o Grupo III sai do escopo e o nível não chega a Excelente.
+- `auditoria` só aceita insert. `regras_nivel` guarda os percentuais do v0.3. O motor SQL da amostra Serra Verde ainda usa o limiar de 26/10 (Grupo III em 70%). Isso é a pendência 30.
 
 ## Documentos
 
+- `docs/prompt-v0.3.md` — pedido do Beta v0.3.
+- `referencia/prototipo-v0.3.html` — fonte das telas.
 - `docs/decisoes-2026-10-27.md` — comitê do IBES e importação por arquivo.
-- `docs/mapeamento-manual.md` — seção 5F com as respostas de 26/10.
 - `docs/conciliacao.md` — onde cada resposta caiu no esquema.
+- `docs/mapeamento-manual.md` — seção 5F com as respostas de 26/10.
 - `docs/respostas-ibes.md` — o que foi aplicado e o que continua pendente.

@@ -380,3 +380,36 @@ begin
 end $$;
 
 reset role;
+
+insert into auditoria (perfil, tipo, acao, objeto)
+values ('admin_ibes', 'Teste', 'linha de auditoria', 'projeto');
+
+do $$
+begin
+  begin
+    update auditoria set acao = 'alterada';
+    raise exception 'auditoria_alterada';
+  exception
+    when insufficient_privilege then
+      null;
+    when raise_exception then
+      if sqlerrm = 'auditoria_alterada' then
+        raise exception 'auditoria aceitou update';
+      end if;
+      raise;
+  end;
+end $$;
+
+do $$
+declare
+  iii integer;
+begin
+  select percentual into iii
+  from regras_nivel
+  where manual_id = '11111111-1111-4111-8111-111111111111'
+    and nivel = 'excelente'
+    and grupo = 'III';
+  if iii <> 40 then
+    raise exception 'regras_nivel v0.3 esperava Grupo III em 40, veio %', iii;
+  end if;
+end $$;
