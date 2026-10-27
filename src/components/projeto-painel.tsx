@@ -49,6 +49,14 @@ const TIPOS: TipoAvaliacao[] = ["certificacao", "manutencao", "recertificacao"];
 const ORGAOS: OrgaoComite[] = ["ACSA", "IBES"];
 const NIVEIS: Nivel[] = ["avancado", "otimo", "excelente"];
 
+const ITENS_PERFIL = Object.fromEntries(PERFIS.map((perfil) => [perfil, ROTULO_PERFIL[perfil]]));
+const ITENS_TIPO = Object.fromEntries(TIPOS.map((tipo) => [tipo, ROTULO_TIPO[tipo]]));
+const ITENS_ORGAO = Object.fromEntries(ORGAOS.map((orgao) => [orgao, ROTULO_ORGAO[orgao]]));
+const ITENS_NIVEL = {
+  nenhum: "Não informado",
+  ...Object.fromEntries(NIVEIS.map((nivel) => [nivel, ROTULO_NIVEL[nivel]])),
+};
+
 export function ProjetoPainel() {
   const [projeto, setProjeto] = useState<Projeto>(() => criarProjetoAmostra());
   const [perfil, setPerfil] = useState<Perfil>("gestor_instituicao");
@@ -118,6 +126,7 @@ export function ProjetoPainel() {
           <div className="grid gap-2">
             <Label htmlFor="perfil">Perfil</Label>
             <Select
+              items={ITENS_PERFIL}
               value={perfil}
               onValueChange={(valor) => {
                 if (!valor) return;
@@ -332,6 +341,12 @@ export function ProjetoPainel() {
           <div className="grid gap-2">
             <Label htmlFor="rodada">Rodada</Label>
             <Select
+              items={Object.fromEntries(
+                projeto.avaliacoes.map((item) => [
+                  item.id,
+                  `Rodada ${item.rodada} · ${ROTULO_TIPO[item.tipo]}`,
+                ]),
+              )}
               value={avaliacao.id}
               onValueChange={(valor) => {
                 if (valor) setAvaliacaoId(valor);
@@ -352,6 +367,7 @@ export function ProjetoPainel() {
           <div className="grid gap-2">
             <Label htmlFor="tipo">Tipo do ciclo</Label>
             <Select
+              items={ITENS_TIPO}
               value={avaliacao.tipo}
               onValueChange={(valor) => {
                 if (!valor) return;
@@ -385,6 +401,11 @@ export function ProjetoPainel() {
               Abrir próxima rodada
             </Button>
           </div>
+          {!podeAbrirRodada(perfil) ? (
+            <p className="text-sm text-muted-foreground md:col-span-3">
+              A instituição não abre rodada. Um perfil IBES abre a seguinte, e a evidência já registrada permanece.
+            </p>
+          ) : null}
           {avaliacao.tipo === "manutencao" ? (
             <p className="text-sm text-muted-foreground md:col-span-3">
               Manutenção avalia só os Grupos I e II aplicáveis. O Grupo III fica fora do cálculo, e esta rodada não concede Excelente.
@@ -487,6 +508,7 @@ export function ProjetoPainel() {
               <div className="grid gap-2">
                 <Label htmlFor="orgao">Órgão</Label>
                 <Select
+                  items={ITENS_ORGAO}
                   value={orgao}
                   onValueChange={(valor) => {
                     if (valor) setOrgao(valor as OrgaoComite);
@@ -537,6 +559,7 @@ export function ProjetoPainel() {
               <div className="grid gap-2">
                 <Label htmlFor="nivel-concedido">Nível concedido</Label>
                 <Select
+                  items={ITENS_NIVEL}
                   value={nivelConcedido}
                   onValueChange={(valor) => {
                     if (valor) setNivelConcedido(valor as Nivel | "nenhum");
