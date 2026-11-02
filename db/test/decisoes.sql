@@ -413,3 +413,144 @@ begin
     raise exception 'regras_nivel v0.3 esperava Grupo III em 40, veio %', iii;
   end if;
 end $$;
+
+-- v0.5: janela única de 12 meses, N/A do manual e requisito só para o IBES.
+
+do $$
+declare
+  prazo integer;
+begin
+  select prazo_autoavaliacao_meses into prazo
+  from manuais
+  where id = '11111111-1111-4111-8111-111111111111';
+  if prazo <> 12 then
+    raise exception 'prazo único esperado 12, veio %', prazo;
+  end if;
+  if exists (
+    select 1
+    from information_schema.columns
+    where table_schema = 'public'
+      and table_name = 'manuais'
+      and column_name = 'prazo_solicitar_auditoria_meses'
+  ) then
+    raise exception 'a janela de 12 meses é única';
+  end if;
+end $$;
+
+select app.definir_perfil('admin_ibes');
+
+update padroes
+set nao_se_aplica_manual = true
+where id = '55555555-5555-4555-8555-555555555512';
+
+select app.definir_perfil('avaliador_ibes');
+set role app_sessao;
+
+do $$
+begin
+  begin
+    update padroes
+    set nao_se_aplica_manual = false
+    where id = '55555555-5555-4555-8555-555555555512';
+    raise exception 'na_manual_limpo';
+  exception
+    when insufficient_privilege then
+      null;
+    when raise_exception then
+      if sqlerrm = 'na_manual_limpo' then
+        raise exception 'avaliador desmarcou N/A do manual';
+      end if;
+      raise;
+  end;
+end $$;
+
+reset role;
+select app.definir_perfil('admin_ibes');
+
+update padroes
+set nao_se_aplica_manual = false
+where id = '55555555-5555-4555-8555-555555555512';
+
+do $$
+declare
+  marcado boolean;
+begin
+  select nao_se_aplica_manual into marcado
+  from padroes
+  where id = '55555555-5555-4555-8555-555555555512';
+  if marcado then
+    raise exception 'admin_ibes não conseguiu desmarcar o N/A do manual';
+  end if;
+end $$;
+
+update padroes
+set nao_se_aplica_manual = true
+where id = '55555555-5555-4555-8555-555555555512';
+
+do $$
+begin
+  begin
+    insert into padroes_nao_aplicaveis (
+      projeto_id, padrao_id, diagnostico_id, origem, registrado_por
+    ) values (
+      '22222222-2222-4222-8222-222222222222',
+      '55555555-5555-4555-8555-555555555512',
+      '33333333-3333-4333-8333-333333333333',
+      'diagnostico',
+      '66666666-6666-4666-8666-666666666661'
+    );
+    raise exception 'diagnostico_gravou';
+  exception
+    when insufficient_privilege then
+      null;
+    when raise_exception then
+      if sqlerrm = 'diagnostico_gravou' then
+        raise exception 'diagnóstico alterou N/A do manual';
+      end if;
+      raise;
+  end;
+end $$;
+
+update padroes
+set nao_se_aplica_manual = false
+where id = '55555555-5555-4555-8555-555555555512';
+
+insert into requisitos_avaliacao (padrao_id, ordem, texto)
+values (
+  '55555555-5555-4555-8555-555555555501',
+  1,
+  'Requisito fictício de demonstração'
+);
+
+select app.definir_perfil('gestor_instituicao');
+set role app_sessao;
+
+do $$
+declare
+  n integer;
+begin
+  select count(*) into n from requisitos_avaliacao;
+  if n <> 0 then
+    raise exception 'instituição leu % requisitos', n;
+  end if;
+
+  begin
+    insert into requisitos_avaliacao (padrao_id, ordem, texto)
+    values (
+      '55555555-5555-4555-8555-555555555502',
+      1,
+      'Requisito indevido'
+    );
+    raise exception 'requisito_gravado';
+  exception
+    when insufficient_privilege then
+      null;
+    when raise_exception then
+      if sqlerrm = 'requisito_gravado' then
+        raise exception 'instituição gravou requisito';
+      end if;
+      raise;
+  end;
+end $$;
+
+reset role;

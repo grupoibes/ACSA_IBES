@@ -1,0 +1,87 @@
+# ACSAS IBES MODERN — Beta v0.5
+
+02/11/2026 · Beta v0.5. A tela de referência passa a ser `referencia/prototipo-v0.5.html`. Esse HTML ainda não está neste repositório: até ele chegar, as telas em execução continuam as do protótipo v0.3 e os roteiros Playwright T16–T20 ficam de fora.
+
+O restante de [prompt-v0.3.md](prompt-v0.3.md) continua valendo, salvo o que esta versão corrige. Duas regras que tinham sido escritas para a v0.4 estavam erradas e foram desfeitas no código, não só no texto: comitê por maioria e dois prazos de 12 meses.
+
+## 4. Fluxo — o que muda
+
+- O Comitê decide por consenso. Os 3 membros votam igual. Com pareceres divergentes, a resolução fica bloqueada e a tela mostra «Sem consenso». O que acontece depois é a pendência 34. A decisão registrada segue o consenso. A justificativa continua obrigatória quando o nível final difere do calculado.
+- O prazo de 12 meses é uma janela única, contada da abertura do projeto. Nela a unidade conclui a autoavaliação e solicita a auditoria. Não existem dois prazos de 12 meses.
+- Manutenção aos 30 meses e recertificação aos 60 meses, ambos contados da data de certificação.
+- O universo do projeto é o núcleo do manual mais os anexos escolhidos no projeto, menos o que não se aplica no manual, menos o que o Diagnóstico marcou como não aplicável.
+- O que não se aplica no manual vale para todo projeto daquele manual e o Diagnóstico não desmarca.
+- O anexo usa os mesmos percentuais de nível do núcleo.
+
+A frase do v0.3 que liberava a resolução com 2 pareceres e maioria deixa de valer.
+
+## 5. Contagens de referência
+
+Estes números são contagem, não texto de padrão. Nenhum enunciado oficial entra em código, semente ou teste.
+
+| Manual | Listados | Anexos | Núcleo por grupo | N/A do manual | No cálculo |
+| --- | --- | --- | --- | --- | --- |
+| ME 2 1_05 Centros Hospitalares | 144 | nenhum | 65 obrigatórios, 98 GI, 30 GII, 16 GIII | 2 (1 GI, 1 GII) | referência de estrutura; o motor SQL de 26/10 continua recusando este código como denominador |
+| ME 5 1_07 UGC | 101 + Laboratório 28 + Hemodiálise 6 + Imagem 24 = 159 | os três | 41 obrigatórios, 65 GI, 24 GII, 12 GIII | 2 (1 GII, 1 GIII) | só o núcleo = 99 (65/23/11); núcleo + Laboratório = 127 (129 − 2) |
+| ME 28 1_01 | 102 + Diálise 6 + Imagem 10 = 118 | os dois | 41 / 69 / 20 / 13 | 0 | núcleo + Imagem = 112 |
+
+ME 5 lista 101 e o cálculo do núcleo usa 99 porque os 2 que não se aplicam no manual saem do total. Elementos e requisitos, só como volume: ME 2 tem 456 elementos e 523 requisitos, sem provas; ME 5 tem 425 elementos e 628 requisitos; ME 28 tem 342 elementos e 320 requisitos.
+
+Hierarquia: âmbito (I–V) › critério (01–11) › padrão › elemento avaliável (autoavaliação) e, à parte, requisito de avaliação (avaliação externa). Cada requisito tem zero ou mais provas, de um catálogo por manual. A prova é opcional. Elemento e requisito guardam o identificador numérico de origem em `id_origem_acsa`. O código do padrão leva o sufixo de versão (`ES 2 01.01_00`). O projeto usa o código do sistema.
+
+A tabela de percentuais do v0.3 permanece. O mínimo continua arredondando para cima. A pendência 30 segue aberta: o motor SQL da amostra ainda usa o limiar de Grupo III em 70%.
+
+## 6. Modelo — o que esta migração acrescenta
+
+`db/migrations/20261102_01_manuais_v05.sql` é uma migração nova. As anteriores não são reescritas.
+
+```
+ambitos              (id, manual_id, codigo 'I'..'V', nome, ordem)
+criterios            (ambito_id)                         -- no lugar de blocos
+anexos_manual        (id, manual_id, nome, ordem)
+padroes              + criterio_id, anexo_id null, nao_se_aplica_manual, id_origem_acsa
+elementos_avaliaveis (padrao_id, ordem, texto, id_origem_acsa)
+requisitos_avaliacao (padrao_id, ordem, texto, id_origem_acsa)
+provas               (manual_id, codigo, nome)
+requisitos_provas    (requisito_id, prova_id)
+projetos_anexos      (projeto_id, anexo_id)
+manuais              prazo_autoavaliacao_meses int default 12
+documentos           (projeto_id, nome, id_origem_acsa)
+evidencias_arquivos  (evidencia_id, documento_id)
+```
+
+Não há coluna `prazo_solicitar_auditoria_meses`. `requisitos_avaliacao` e `requisitos_provas` são visíveis só para `admin_ibes`, `responsavel_ibes`, `avaliador_ibes` e `membro_comite`.
+
+Staging, sem tela final:
+
+```
+stg_projetos     (idpry_acsa, codigo, manual_codigo, payload jsonb, importado_em)
+stg_documentos   (id_fichero_acsa, idpry_acsa, idaut_acsa, nome, tamanho_bytes, enviado_em, enviado_por, arquivo_path)
+stg_doc_vinculos (id_fichero_acsa, cod_estandar, id_evidencia_acsa, descricao_evidencia, descricao_area_melhoria)
+```
+
+O texto de área de melhoria do lote histórico fica em `stg_doc_vinculos`. O vínculo do arquivo com a evidência é `evidencias_arquivos`.
+
+## 10. Pendências
+
+Quando a tarefa depender destes itens, deixe em configuração e marque `// PENDÊNCIA nº`:
+
+- 34: sem consenso no Comitê, o que acontece (nova rodada, desempate, troca de membro)? O bloqueio está implementado.
+- 33: regra de conflito de interesse do Comitê. A declaração continua em cada parecer.
+- 21: unidade dos prazos de Diagnóstico (1), Candidatura (2) e da nova avaliação após negativa (6). Os números estão em `PRAZOS_ETAPA`. A unidade não foi decidida.
+- 31: exportação formal dos dados da ACSA (até 30/11/2026).
+- 46: a exportação formal inclui os anexos das evidências?
+- 40: licença formal do IBES para os textos dos manuais (os PDFs trazem Creative Commons BY-NC-ND).
+- 19: a IA continua no escopo?
+
+Fechadas e removidas: 2 (101 × 99 = N/A do manual) e 4 (manuais extraídos). As pendências 12, 23, 25, 27, 29 e 30 do v0.3 que não foram fechadas aqui continuam abertas.
+
+## Importação
+
+A tela do IBES em `/importar-manual` lê um `.xlsx` com as abas `Padroes`, `Elementos`, `Requisitos_avaliacao` e `Provas`, nas colunas pedidas no prompt. Os totais por critério precisam bater com o que o usuário informa. A gravação é uma transação. O resumo (padrões, elementos, requisitos, provas, N/A do manual) aparece antes da confirmação. O teste usa a planilha fictícia ME 0 0_00. O conteúdo oficial dos manuais não entra no repositório.
+
+O índice de documentos da migração é o JSON `indice_documentos_idautN.json`. A deduplicação é por `id_fichero`. Volume previsto do lote histórico: cerca de 110 mil arquivos e 46 GB. Arquivo novo: até 20 MB, com compressão de imagem no upload, no caminho `projeto/{id}/id_origem/{id}`. O lote histórico não passa por esse limite. O sistema não acessa a plataforma de origem; a extração é feita fora do repositório.
+
+## Testes
+
+Vitest cobre consenso, prazos, universo, nível com anexo, a recusa do Diagnóstico sobre N/A do manual, a planilha fictícia e o índice de documentos. `npm run test:sql` cobre a coluna de 12 meses, a ausência do segundo prazo, o bloqueio para desmarcar N/A do manual e a invisibilidade do requisito para a instituição. Playwright T16–T20 espera o protótipo v0.5.
