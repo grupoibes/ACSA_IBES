@@ -30,7 +30,7 @@ function storageSupabase(url: string, chave: string): StoragePort {
       const resposta = await fetch(`${objeto}/${caminho}`, {
         method: "POST",
         headers: { authorization: `Bearer ${chave}`, "content-type": mime, "x-upsert": "true" },
-        body: bytes,
+        body: Buffer.from(bytes),
       });
       if (!resposta.ok) throw new Error(`Storage recusou o arquivo (${resposta.status}).`);
     },
@@ -54,8 +54,15 @@ function storageSupabase(url: string, chave: string): StoragePort {
   };
 }
 
-/** Sem credencial, a homologação usa a memória. Com as duas variáveis, usa o bucket documentos. */
+let memoriaCompartilhada: StoragePort | null = null;
+
+/** Sem credencial, a homologação usa um único mapa no processo. Com as duas variáveis, usa o bucket documentos. */
 export function criarStorage(env: { url?: string; chave?: string } = {}): { nome: "memoria" | "supabase"; port: StoragePort } {
   if (env.url && env.chave) return { nome: "supabase", port: storageSupabase(env.url, env.chave) };
-  return { nome: "memoria", port: storageEmMemoria() };
+  if (!memoriaCompartilhada) memoriaCompartilhada = storageEmMemoria();
+  return { nome: "memoria", port: memoriaCompartilhada };
+}
+
+export function reiniciarStorageMemoria(): void {
+  memoriaCompartilhada = null;
 }
