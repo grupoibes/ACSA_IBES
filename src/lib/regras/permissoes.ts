@@ -36,7 +36,7 @@ export function podeRegistrarParecer(papel: Papel): boolean {
   return papel === "comite" || papel === "comite2";
 }
 
-/** PENDÊNCIA 12: bloqueio provisório exige obrigatório respondido e com evidência chancelada. */
-export function bloqueioAutoavaliacao(obrigatorio: boolean, respondido: boolean, chancelada: boolean): boolean {
-  return obrigatorio && !(respondido && chancelada);
+/** Fechado em 28/10: o obrigatório aplicável sai da autoavaliação com Cumpre e evidência chancelada. */
+export function bloqueioAutoavaliacao(obrigatorio: boolean, cumpre: boolean, chancelada: boolean): boolean {
+  return obrigatorio && !(cumpre && chancelada);
 }

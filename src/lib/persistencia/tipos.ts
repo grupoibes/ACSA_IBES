@@ -1,4 +1,5 @@
 import type { Candidatura } from "@/domain/candidatura";
+import type { PadraoCatalogo } from "@/domain/catalogo";
 import type {
   DocumentoRegistro,
   LinhaAuditoria,
@@ -8,6 +9,15 @@ import type {
 } from "@/domain/demo";
 import type { LinhaIndice } from "@/domain/indice";
 import type { MembroProjeto } from "@/domain/leituraDocumento";
+import type { EtapaEvidencia } from "@/domain/evidencia";
+import type {
+  AcaoArea,
+  AreaRegistro,
+  DiagnosticoRegistro,
+  EmailRegistro,
+  EvidenciaRegistro,
+  RespostaRegistro,
+} from "@/domain/rodada";
 
 export type Ator = { perfil: string; usuarioId: string | null };
 
@@ -21,6 +31,18 @@ export type EntradaCriacao = {
   abertura: string;
   origem: OrigemCriacao;
   candidaturaId: string | null;
+};
+
+export type DadosRodada = {
+  padroes: PadraoCatalogo[];
+  diagnostico: DiagnosticoRegistro | null;
+  naoAplicaveis: string[];
+  respostas: RespostaRegistro[];
+  evidencias: EvidenciaRegistro[];
+  areas: AreaRegistro[];
+  emails: EmailRegistro[];
+  auditoria: LinhaAuditoria[];
+  origem: { codigo: string; evidencias: { id: string; descricao: string; etapa: EtapaEvidencia }[] } | null;
 };
 
 export type Repo = {
@@ -42,6 +64,18 @@ export type Repo = {
   acrescentarVersao(documentoId: string, versao: VersaoDocumento, ator: Ator): Promise<void>;
   reclassificar(documentoId: string, classificacao: string, ator: Ator): Promise<void>;
   auditoria(): Promise<LinhaAuditoria[]>;
+  dadosRodada(projetoId: string): Promise<DadosRodada>;
+  salvarDiagnostico(registro: DiagnosticoRegistro, ator: Ator): Promise<void>;
+  definirNaoAplicavel(projetoId: string, padraoId: string, marcado: boolean, ator: Ator): Promise<void>;
+  salvarResposta(resposta: RespostaRegistro, ator: Ator): Promise<void>;
+  enviarEvidencia(evidencia: EvidenciaRegistro, ator: Ator): Promise<void>;
+  vincularEvidencia(evidenciaId: string, documentoId: string, ator: Ator): Promise<void>;
+  transitarEvidencia(evidenciaId: string, etapa: "conferida" | "chancelada", ator: Ator): Promise<void>;
+  marcarCumpre(projetoId: string, padraoId: string, ciclo: RespostaRegistro["ciclo"], ator: Ator): Promise<void>;
+  criarArea(area: AreaRegistro, ator: Ator): Promise<void>;
+  transitarArea(areaId: string, acao: AcaoArea, ator: Ator): Promise<void>;
+  avancarEtapa(projetoId: string, ator: Ator): Promise<void>;
+  abrirComplementar(origemId: string, ator: Ator): Promise<string>;
 };
 
 export class ErroHttp extends Error {

@@ -62,7 +62,7 @@ Etapas do projeto (workflow com avanço **manual** pelo IBES e **bloqueio** quan
 - **Diagnóstico** (antes da abertura): o avaliador levanta perfil e serviços da instituição; o IBES registra avaliador, data, relatório anexo e a lista de padrões **não aplicáveis**. Os N/A **não aparecem para a unidade** (filtro por RLS e na tela) e saem do total e do mínimo do cálculo.
 - **Autoavaliação:** cada padrão tem resposta binária (Sim/Não), resposta qualitativa e evidências. A evidência passa por **envio → conferência → chancela**, e cada passo grava usuário, data e hora. Devolução exige motivo.
 - **Regra do Cumpre:** só libera com resposta "Sim" **e** ao menos uma evidência chancelada, ou uma área de melhoria concluída.
-- **Bloqueio para sair da Autoavaliação:** todo padrão obrigatório aplicável precisa estar respondido e com evidência chancelada (regra provisória, pendência 12).
+- **Bloqueio para sair da Autoavaliação:** todo padrão obrigatório aplicável precisa de Cumpre marcado e de evidência chancelada. Fechado em 28/10.
 - **Avaliação:** agendamento (tipo, data, equipe, e-mail para cliente e equipe), relatório do avaliador por padrão (certificação: Cumpre/Não cumpre; manutenção: Mantém/Não mantém), pontos fortes e fracos em texto livre com consolidação pelo líder.
 - **Resultado da rodada:** Em curso | Positiva | Negativa. **Negativa mantém o mesmo projeto e o mesmo código**: o IBES abre a rodada seguinte (`rodada` 2, 3…), os resultados do avaliador recomeçam e as evidências continuam.
 - **Comitê de Certificação do IBES** (só com resultado Positiva): tela de conferência relatório × evidências; cada membro registra **parecer** (voto, nível proposto, texto, declaração de conflito de interesse); a **resolução** libera com 2 pareceres e segue a maioria (regra provisória, pendência 33). Justificativa obrigatória quando a decisão diverge da maioria ou o nível difere do calculado.
@@ -163,7 +163,7 @@ Fase 2: avaliação, rodadas, comitê, certificado, manutenção, e-mails autom�
 
 Quando uma tarefa depender destes itens, implemente como **configuração** e marque `// PENDÊNCIA nº` no código:
 
-- 12: bloqueio exige obrigatório preenchido ou cumprido?
+- 12: fechada em 28/10. Sair da autoavaliação exige Cumpre e evidência chancelada em todo obrigatório aplicável.
 - 19: IA continua no escopo?
 - 21: prazo e limite de rodadas após avaliação negativa
 - 23: campos da resolução e o que é a "pontuação"

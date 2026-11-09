@@ -30,8 +30,9 @@ describe("permissões do Beta v0.3", () => {
     assert.equal(podeRegistrarParecer("admin"), false);
   });
 
-  it("bloqueia a saída da autoavaliação sem resposta e evidência chancelada no obrigatório", () => {
+  it("bloqueia a saída da autoavaliação sem Cumpre e evidência chancelada no obrigatório", () => {
     assert.equal(bloqueioAutoavaliacao(true, true, false), true);
+    assert.equal(bloqueioAutoavaliacao(true, false, true), true);
     assert.equal(bloqueioAutoavaliacao(true, true, true), false);
     assert.equal(bloqueioAutoavaliacao(false, false, false), false);
   });
