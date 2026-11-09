@@ -1,0 +1,110 @@
+import type { Candidatura } from "@/domain/candidatura";
+import {
+  criarEstadoDemo,
+  linhaDoProjeto,
+  projetoPorSlug,
+  type DocumentoRegistro,
+  type EstadoDemo,
+  type ProjetoRegistro,
+  type VersaoDocumento,
+} from "@/domain/demo";
+import type { Repo } from "@/lib/persistencia/tipos";
+
+const globalDemo = globalThis as unknown as { __acsasEstado?: EstadoDemo };
+
+export function obterEstadoGlobal(): EstadoDemo {
+  if (!globalDemo.__acsasEstado) globalDemo.__acsasEstado = criarEstadoDemo();
+  return globalDemo.__acsasEstado;
+}
+
+export function reiniciarEstadoGlobal(): void {
+  const atual = obterEstadoGlobal();
+  const novo = criarEstadoDemo();
+  atual.projetos.splice(0, atual.projetos.length, ...novo.projetos);
+  atual.candidaturas.splice(0, atual.candidaturas.length, ...novo.candidaturas);
+  atual.documentos.splice(0, atual.documentos.length, ...novo.documentos);
+  atual.auditoria.splice(0, atual.auditoria.length, ...novo.auditoria);
+  atual.membros.splice(0, atual.membros.length, ...novo.membros);
+}
+
+export function criarRepoSessao(estado: EstadoDemo = criarEstadoDemo()): Repo {
+  return {
+    modo: "sessao",
+    async codigosProjeto() {
+      return estado.projetos.map((item) => item.codigo);
+    },
+    async codigosOcupados() {
+      const abertas = estado.candidaturas.filter((item) => item.situacao !== "convertida").map((item) => item.codigo);
+      return [...estado.projetos.map((item) => item.codigo), ...abertas];
+    },
+    async linhas(hoje) {
+      return estado.projetos.map((item) => linhaDoProjeto(item, hoje));
+    },
+    async projetoPorSlug(slug) {
+      return projetoPorSlug(estado.projetos, slug);
+    },
+    async projetoPorId(id) {
+      return estado.projetos.find((item) => item.id === id) ?? null;
+    },
+    async inserirProjeto(registro: ProjetoRegistro) {
+      estado.projetos.push(registro);
+      estado.auditoria.unshift({ tipo: "projetos", acao: "insert", objeto: registro.id });
+      return registro.id;
+    },
+    async candidaturas() {
+      return estado.candidaturas.map((item) => ({ ...item }));
+    },
+    async obterCandidatura(id) {
+      const candidatura = estado.candidaturas.find((item) => item.id === id);
+      return candidatura ? { ...candidatura } : null;
+    },
+    async salvarCandidatura(candidatura: Candidatura) {
+      const indice = estado.candidaturas.findIndex((item) => item.id === candidatura.id);
+      if (indice < 0) throw new Error("Candidatura não encontrada.");
+      estado.candidaturas[indice] = candidatura;
+      estado.auditoria.unshift({ tipo: "candidaturas", acao: "update", objeto: candidatura.id });
+    },
+    async membros(projetoId) {
+      return estado.membros.filter((item) => item.projetoId === projetoId);
+    },
+    async projetosDoUsuario(usuarioId) {
+      if (!usuarioId) return [];
+      return estado.membros.filter((item) => item.usuarioId === usuarioId).map((item) => item.projetoId);
+    },
+    async documentos(projetoId) {
+      return estado.documentos.filter((item) => item.projetoId === projetoId).map(clonarDocumento);
+    },
+    async hashes(projetoId) {
+      return estado.documentos
+        .filter((item) => item.projetoId === projetoId)
+        .flatMap((item) => item.versoes.map((versao) => ({ sha256: versao.sha256, caminho: versao.caminho })));
+    },
+    async inserirDocumento(documento: DocumentoRegistro) {
+      estado.documentos.push(documento);
+      estado.auditoria.unshift({ tipo: "documentos", acao: "insert", objeto: documento.id });
+    },
+    async acrescentarVersao(documentoId: string, versao: VersaoDocumento) {
+      const documento = estado.documentos.find((item) => item.id === documentoId);
+      if (!documento) throw new Error("Documento não encontrado.");
+      documento.versoes.push(versao);
+      estado.auditoria.unshift({ tipo: "documento_versoes", acao: "insert", objeto: documentoId });
+    },
+    async reclassificar(documentoId, classificacao) {
+      const documento = estado.documentos.find((item) => item.id === documentoId);
+      if (!documento) throw new Error("Documento não encontrado.");
+      documento.classificacao = classificacao;
+      estado.auditoria.unshift({ tipo: "documentos", acao: "update", objeto: documentoId });
+    },
+    async auditoria() {
+      return [...estado.auditoria];
+    },
+  };
+}
+
+function clonarDocumento(documento: DocumentoRegistro): DocumentoRegistro {
+  return { ...documento, versoes: documento.versoes.map((versao) => ({ ...versao })) };
+}
+
+export function repoSessaoGlobal(): Repo {
+  return criarRepoSessao(obterEstadoGlobal());
+}

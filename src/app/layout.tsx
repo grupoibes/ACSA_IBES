@@ -17,7 +17,7 @@ const mono = IBM_Plex_Mono({
 
 export const metadata: Metadata = {
   title: "ACSAS IBES MODERN",
-  description: "Plataforma de acreditação do IBES. Beta v0.3, ambiente de homologação, dados fictícios.",
+  description: "Plataforma de acreditação do IBES. Beta v0.5, ambiente de homologação, dados fictícios.",
 };
 
 export default function RootLayout({

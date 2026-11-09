@@ -1,14 +1,16 @@
 # ACSAS IBES MODERN
 
-Plataforma de acreditação do IBES. A tela em execução é o Beta v0.3: identidade do GRUPO IBES, projeto fictício `2025/009` do Hospital Modelo de Demonstração e o manual de demonstração. Definições de padrão nessa tela são texto fictício. O catálogo oficial entra pela importação do IBES.
+Plataforma de acreditação do IBES. A tela em execução é o Beta v0.5: índice de projetos, projeto novo, candidaturas, ficha e biblioteca. O projeto fictício `2025/009` do Hospital Modelo de Demonstração abre em `/projetos/2025-009`. Definições de padrão continuam texto fictício. O catálogo oficial entra pela importação do IBES.
 
-As regras do Beta v0.5 (02/11/2026) já estão no motor: consenso do comitê, janela única de 12 meses e universo do projeto. O HTML do protótipo v0.5 está em `referencia/prototipo-v0.5.html`. As telas em execução continuam as do v0.3, com os ajustes já feitos no motor e o rótulo da pontuação.
+As regras do Beta v0.5 (02/11/2026) estão no motor: consenso do comitê, janela única de 12 meses e universo do projeto. O HTML do protótipo v0.5 está em `referencia/prototipo-v0.5.html`. Diagnóstico, workflow, usuários, indicadores e as demais telas do protótipo ficam para a próxima rodada. Sem `ACSAS_DATABASE_URL`, a homologação usa a sessão de demonstração. Com a variável, projeto, candidatura, documento e reclassificação gravam no Postgres e na auditoria.
 
 ## Rodar
 
 ```bash
 npm install
 npm test
+npm run test:sql
+npm run test:e2e
 npm run dev
 ```
 
@@ -24,7 +26,7 @@ npm run test:sql
 
 ## O que está nesta entrega
 
-- Emblema e fundo oficiais, cabeçalho, menu do projeto e as telas do protótipo v0.3.
+- Emblema e fundo oficiais, cabeçalho e as telas da Prioridade 1 do v0.5: índice com busca, projeto novo, candidaturas, ficha e biblioteca. O menu do que ainda não entrou aponta para a próxima rodada, sem remontar o script v0.3.
 - Regras de nível e de permissão em `src/lib/regras`, com teste. O caso conhecido 139/142 aparece como 97,9%. Na manutenção o Grupo III sai do escopo e o nível não chega a Excelente.
 - Consenso: três pareceres com o mesmo voto. Sem consenso, `podeResolver` devolve `SEM_CONSENSO` (pendência 34).
 - Prazos: 12 meses desde a abertura para a autoavaliação e o pedido de auditoria; manutenção +30 e recertificação +60 desde a certificação.
@@ -35,8 +37,8 @@ npm run test:sql
 
 - `docs/prompt-v0.5.md` — pedido do Beta v0.5.
 - `docs/prompt-v0.3.md` — pedido do Beta v0.3, ainda válido no que a v0.5 não corrige.
-- `referencia/prototipo-v0.3.html` — fonte das telas em execução.
-- `referencia/prototipo-v0.5.html` — referência das telas da próxima rodada.
+- `referencia/prototipo-v0.3.html` — protótipo anterior. O script continua no repositório e não é a tela em `/`.
+- `referencia/prototipo-v0.5.html` — referência das telas do Beta v0.5.
 - `docs/decisoes-2026-10-27.md` — comitê do IBES e importação por arquivo.
 - `docs/conciliacao.md` — onde cada resposta caiu no esquema.
 - `docs/mapeamento-manual.md` — seção 5F com as respostas de 26/10.

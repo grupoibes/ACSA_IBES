@@ -7,6 +7,7 @@ describe("biblioteca", () => {
   it("limita o arquivo novo a 25 MB e recusa zip", () => {
     expect(LIMITE_ARQUIVO_NOVO_BYTES).toBe(25 * 1024 * 1024);
     expect(arquivoNovoAceito(LIMITE_ARQUIVO_NOVO_BYTES + 1, "laudo.pdf")).toMatch(/25 MB/);
+    expect(arquivoNovoAceito(0, "vazio.pdf")).toMatch(/vazio/);
     expect(arquivoNovoAceito(100, "pacote.zip")).toMatch(/não é aceito/);
     expect(arquivoNovoAceito(100, "laudo.pdf")).toBeNull();
   });
@@ -62,8 +63,16 @@ describe("biblioteca", () => {
     ).rejects.toThrow(/já está no projeto/);
   });
 
-  it("usa memória sem credencial e o bucket quando as variáveis existem", () => {
-    expect(criarStorage({}).nome).toBe("memoria");
+  it("usa memória sem credencial e o bucket quando as variáveis existem", async () => {
+    const { reiniciarStorageMemoria } = await import("./storage");
+    reiniciarStorageMemoria();
+    const primeiro = criarStorage({});
+    expect(primeiro.nome).toBe("memoria");
+    await primeiro.port.put("projeto/a/documentos/d/v1/a.pdf", new Uint8Array([9]), "application/pdf");
+    const segundo = criarStorage({});
+    expect(segundo.port).toBe(primeiro.port);
+    expect(await segundo.port.get("projeto/a/documentos/d/v1/a.pdf")).toEqual(new Uint8Array([9]));
     expect(criarStorage({ url: "https://exemplo.supabase.co", chave: "chave" }).nome).toBe("supabase");
+    reiniciarStorageMemoria();
   });
 });

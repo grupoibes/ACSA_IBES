@@ -63,6 +63,7 @@ export function caminhoVersao(projetoId: string, documentoId: string, versao: nu
 }
 
 export function arquivoNovoAceito(tamanho: number, nome: string): string | null {
+  if (tamanho <= 0) return "O arquivo está vazio.";
   if (tamanho > LIMITE_ARQUIVO_NOVO_BYTES) return "O arquivo passa de 25 MB.";
   const tipo = extensao(nome);
   if (EXTENSOES_BLOQUEADAS.has(tipo)) return "Este tipo de arquivo não é aceito.";
