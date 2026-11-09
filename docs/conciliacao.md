@@ -65,11 +65,11 @@ Permanecem `PENDENTE IBES` em [respostas-ibes.md](respostas-ibes.md). O formato 
 
 ## Beta v0.5 (02/11/2026)
 
-O pedido está em [prompt-v0.5.md](prompt-v0.5.md). O HTML `referencia/prototipo-v0.5.html` ainda não está no repositório, então as telas em execução continuam as do v0.3. O que mudou no código:
+O pedido está em [prompt-v0.5.md](prompt-v0.5.md). O HTML está em `referencia/prototipo-v0.5.html`. As telas em execução continuam as do v0.3, fora o que a seção 0 e o rótulo da pontuação já mudaram. O que mudou no código:
 
 - Consenso do comitê em `src/lib/regras/comite.ts`: três pareceres com o mesmo voto. Sem consenso, a resolução fica bloqueada (`SEM_CONSENSO`). PENDÊNCIA 34.
 - Uma janela de 12 meses desde a abertura, em `prazoAutoavaliacao`. Manutenção +30 e recertificação +60 contam da certificação. `manuais.prazo_autoavaliacao_meses` nasce em 12. Não há coluna de um segundo prazo.
 - Universo em `src/lib/regras/universo.ts`: núcleo + anexos do projeto − N/A do manual − N/A do diagnóstico. O percentual do nível incide sobre esse conjunto. O Diagnóstico não altera `nao_se_aplica_manual`.
-- `db/migrations/20261102_01_manuais_v05.sql` cria âmbito, critério, anexo, elemento, requisito, prova e o staging de projetos. Requisitos ficam sob RLS dos perfis IBES. O motor SQL `calcular_nivel` de 26/10 segue recusando ME 2 1_05 como denominador.
+- `db/migrations/20261102_01_manuais_v05.sql` cria âmbito, critério, anexo, elemento, requisito, prova e o staging de projetos. Requisitos ficam sob RLS dos perfis IBES. Desde 09/11, `calcular_nivel` lê `regras_nivel` e aceita o manual importado, inclusive ME 2 1_05. O 144 não é denominador.
 - A tela `/importar-manual` lê a planilha, mostra o resumo e só então confirma. Nesta homologação a confirmação não grava no Postgres. A planilha de teste é fictícia (ME 0 0_00).
-- Arquivo novo: até 20 MB, caminho `projeto/{id}/id_origem/{id}`. O lote histórico não passa por esse limite. A extração continua fora do repositório.
+- Arquivo novo: até 25 MB, caminho `projeto/{id}/documentos/{doc}/v{n}/{arquivo}`, URL assinada por 120 segundos. O lote histórico não passa por esse limite, não tem o arquivo renomeado e compartilha objeto quando o SHA-256 repete. A extração de 02/11 contou 112.009 arquivos, cerca de 97 GB. O plano Supabase Pro tem 100 GB.
