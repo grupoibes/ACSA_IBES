@@ -64,6 +64,7 @@ begin
 end $$;
 
 select app.definir_perfil('gestor_instituicao');
+select app.definir_usuario('66666666-6666-4666-8666-666666666663');
 
 do $$
 declare
@@ -308,14 +309,31 @@ select app.definir_perfil('membro_comite');
 set role app_sessao;
 
 insert into pareceres_comite (projeto_id, avaliacao_id, membro, parecer, voto, data)
-values (
-  '22222222-2222-4222-8222-222222222222',
-  '44444444-4444-4444-8444-444444444442',
-  '66666666-6666-4666-8666-666666666664',
-  'Os obrigatórios aplicáveis estão cumpridos e o Grupo II fecha o mínimo.',
-  'favoravel',
-  '2026-10-27'
-);
+values
+  (
+    '22222222-2222-4222-8222-222222222222',
+    '44444444-4444-4444-8444-444444444442',
+    '66666666-6666-4666-8666-666666666664',
+    'Os obrigatórios aplicáveis estão cumpridos e o Grupo II fecha o mínimo.',
+    'favoravel',
+    '2026-10-27'
+  ),
+  (
+    '22222222-2222-4222-8222-222222222222',
+    '44444444-4444-4444-8444-444444444442',
+    '66666666-6666-4666-8666-666666666665',
+    'O mesmo voto, em consenso.',
+    'favoravel',
+    '2026-10-27'
+  ),
+  (
+    '22222222-2222-4222-8222-222222222222',
+    '44444444-4444-4444-8444-444444444442',
+    '66666666-6666-4666-8666-666666666666',
+    'O mesmo voto, em consenso.',
+    'favoravel',
+    '2026-10-27'
+  );
 
 insert into resolucoes_comite (
   projeto_id, avaliacao_id, decisao, pontuacao, nivel_concedido, data, documento, registrado_por
@@ -339,7 +357,7 @@ begin
   from app.padroes_do_projeto('22222222-2222-4222-8222-222222222222')
   where codigo = '5.06.02' and nao_aplicavel;
   select count(*) into pareceres from pareceres_comite;
-  if sala <> 1 or pareceres <> 1 then
+  if sala <> 1 or pareceres <> 3 then
     raise exception 'membro do comitê não viu o padrão ou o parecer (sala %, pareceres %)', sala, pareceres;
   end if;
 end $$;
@@ -523,6 +541,7 @@ values (
 );
 
 select app.definir_perfil('gestor_instituicao');
+select app.definir_usuario('66666666-6666-4666-8666-666666666663');
 set role app_sessao;
 
 do $$

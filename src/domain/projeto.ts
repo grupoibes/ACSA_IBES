@@ -7,6 +7,7 @@ import {
   origemNaoAplicavelAdmitida,
 } from "@/domain/acesso";
 import { calcularNivel, type EntradaNivel, type ResultadoNivel } from "@/domain/calcularNivel";
+import { contaNoNumerador, type EtapaEvidencia, type ResultadoPadrao } from "@/domain/evidencia";
 import {
   LIMIARES_ME_5_1_07,
   MANUAL_OPERACIONAL,
@@ -47,10 +48,11 @@ export interface Avaliacao {
 export interface Evidencia {
   id: string;
   padraoId: string;
-  avaliacaoId: string;
+  avaliacaoId: string | null;
   rodada: number;
   descricao: string;
   criadaEm: string;
+  etapa: EtapaEvidencia;
 }
 
 export interface HistoricoEstado {
@@ -188,6 +190,7 @@ export function criarProjetoAmostra(): Projeto {
         rodada: 1,
         descricao: "POP de dispensação revisado em março, com checklist de identificação.",
         criadaEm: "2026-09-02T11:20:00-03:00",
+        etapa: "enviada",
       },
       {
         id: "ev-2",
@@ -196,6 +199,7 @@ export function criarProjetoAmostra(): Projeto {
         rodada: 2,
         descricao: "Observação de 8 dispensações em 02/10. A identificação foi conferida em todas.",
         criadaEm: "2026-10-03T16:40:00-03:00",
+        etapa: "chancelada",
       },
       {
         id: "ev-3",
@@ -204,7 +208,19 @@ export function criarProjetoAmostra(): Projeto {
         rodada: 2,
         descricao: "Amostra de 30 prescrições com dispensação e devolução localizáveis no sistema.",
         criadaEm: "2026-10-03T17:05:00-03:00",
+        etapa: "chancelada",
       },
+      ...[...cumpridosRodada2]
+        .filter((id) => id !== "5.01.02" && id !== "5.04.01")
+        .map((id) => ({
+          id: `ev-chancela-${id}`,
+          padraoId: id,
+          avaliacaoId: avaliacao2,
+          rodada: 2,
+          descricao: "Evidência de demonstração da amostra Serra Verde",
+          criadaEm: "2026-10-03T16:40:00-03:00",
+          etapa: "chancelada" as const,
+        })),
     ],
   };
 }
@@ -217,14 +233,22 @@ export function entradaDaAvaliacao(projeto: Projeto, avaliacaoId: string): Entra
     manual: projeto.manual,
     tipo: avaliacao.tipo,
     limiares: LIMIARES_ME_5_1_07,
-    padroes: projeto.padroes.map((padrao) => ({
-      id: padrao.id,
-      grupo: padrao.grupo,
-      obrigatorio: padrao.obrigatorio,
-      imprescindivel: padrao.imprescindivel,
-      naoAplicavel: excluidos.has(padrao.id),
-      cumprido: avaliacao.conformidades[padrao.id] === true,
-    })),
+    padroes: projeto.padroes.map((padrao) => {
+      const marcado = avaliacao.conformidades[padrao.id];
+      const resultado: ResultadoPadrao | undefined =
+        marcado === true ? "cumpre" : marcado === false ? "nao_cumpre" : undefined;
+      const etapas = projeto.evidencias
+        .filter((item) => item.padraoId === padrao.id)
+        .map((item) => item.etapa);
+      return {
+        id: padrao.id,
+        grupo: padrao.grupo,
+        obrigatorio: padrao.obrigatorio,
+        imprescindivel: padrao.imprescindivel,
+        naoAplicavel: excluidos.has(padrao.id),
+        cumprido: contaNoNumerador(resultado, etapas),
+      };
+    }),
   };
 }
 
@@ -334,6 +358,7 @@ export function adicionarEvidencia(
     rodada: avaliacao.rodada,
     descricao: texto,
     criadaEm,
+    etapa: "enviada",
   };
   return { ...projeto, evidencias: [...projeto.evidencias, evidencia] };
 }

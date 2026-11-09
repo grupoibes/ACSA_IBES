@@ -33,7 +33,7 @@ Cada linha liga a resposta da [seção 5F](mapeamento-manual.md) ao banco, à fu
 | `db/migrations/20261026_08_amostra.sql` | Doze padrões de demonstração e o projeto Serra Verde. Não é o catálogo oficial. |
 | `db/migrations/20261027_01_comite_ibes.sql` | Perfil `membro_comite`, pareceres e alinhamento da resolução. |
 | `db/migrations/20261027_02_importacao_arquivos.sql` | Lote de CSV ou JSON exportado, com anexos. Formato de entrada nulo, PENDENTE IBES. |
-| `db/migrations/20261027_03_auditoria_regras_nivel.sql` | `auditoria` só com insert. `regras_nivel` com a tabela do v0.3 (Grupo III em 40%). PENDÊNCIA 30: `calcular_nivel` ainda não lê essa tabela. |
+| `db/migrations/20261027_03_auditoria_regras_nivel.sql` | `auditoria` só com insert. `regras_nivel` com a tabela do v0.3 (Grupo III em 40%). Desde `20261109_01_base_v051.sql`, `calcular_nivel` lê essa tabela. |
 
 `db/test/decisoes.sql` percorre a amostra: nível Ótima, Grupo II com mínimo 1 em vez de 2, lista vazia de não aplicáveis para o gestor, recusa de estado terminal, evidência que não some, origem diferente de `diagnostico` rejeitada e Grupo III fora da manutenção.
 

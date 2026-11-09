@@ -29,7 +29,7 @@ ME 5 lista 101 e o cálculo do núcleo usa 99 porque os 2 que não se aplicam no
 
 Hierarquia: âmbito (I–V) › critério (01–11) › padrão › elemento avaliável (autoavaliação) e, à parte, requisito de avaliação (avaliação externa). Cada requisito tem zero ou mais provas, de um catálogo por manual. A prova é opcional. Elemento e requisito guardam o identificador numérico de origem em `id_origem_acsa`. O código do padrão leva o sufixo de versão (`ES 2 01.01_00`). O projeto usa o código do sistema.
 
-A tabela de percentuais do v0.3 permanece. O mínimo continua arredondando para cima. A pendência 30 segue aberta: o motor SQL da amostra ainda usa o limiar de Grupo III em 70%.
+A tabela de percentuais do v0.3 permanece. O mínimo continua arredondando para cima. Desde 09/11 o motor SQL lê `regras_nivel` (Grupo III em 40% na amostra).
 
 ## 6. Modelo — o que esta migração acrescenta
 
@@ -73,8 +73,9 @@ Quando a tarefa depender destes itens, deixe em configuração e marque `// PEND
 - 46: a exportação formal inclui os anexos das evidências?
 - 40: licença formal do IBES para os textos dos manuais (os PDFs trazem Creative Commons BY-NC-ND).
 - 19: a IA continua no escopo?
+- 49: remover os apelidos `responsavel_ibes`, `gestor_instituicao` e `profissional_instituicao` depois da migração dos dados. Enquanto isso valem como Backoffice, Responsável do projeto e Conferente. `admin_ibes`, `avaliador_ibes` e `membro_comite` permanecem, porque já são nomes da matriz.
 
-Fechadas e removidas: 2 (101 × 99 = N/A do manual) e 4 (manuais extraídos). As pendências 12, 23, 25, 27, 29 e 30 do v0.3 que não foram fechadas aqui continuam abertas.
+Fechadas e removidas: 2 (101 × 99 = N/A do manual) e 4 (manuais extraídos). As pendências 12, 23, 25, 27 e 29 do v0.3 que não foram fechadas aqui continuam abertas. A 30 deixou de travar o motor SQL em 09/11.
 
 ## Importação
 

@@ -2,7 +2,6 @@ import {
   CONTAGEM_REFERENCIA_ESTRUTURA,
   gruposNoEscopo,
   LIMIARES_ME_5_1_07,
-  MANUAL_OPERACIONAL,
   MANUAL_REFERENCIA_ESTRUTURA,
   minimoCumpridos,
   type Grupo,
@@ -52,7 +51,7 @@ export interface ResumoGrupo {
 }
 
 export interface ResultadoNivel {
-  manual: typeof MANUAL_OPERACIONAL;
+  manual: string;
   tipo: TipoAvaliacao;
   nivel: Nivel | null;
   grupos: ResumoGrupo[];
@@ -179,20 +178,12 @@ function conceder(grupos: ResumoGrupo[], tipo: TipoAvaliacao): Nivel | null {
 }
 
 /**
- * Nível a partir dos padrões aplicáveis do ME 5 1_07.
+ * Nível a partir dos padrões aplicáveis do manual importado.
+ * O 144 de ME 2 1_05 permanece referência de estrutura e não é denominador.
  * Padrão não aplicável sai do total e do mínimo de cada gate.
  * Manutenção não avalia o Grupo III, então não concede Excelente.
  */
 export function calcularNivel(entrada: EntradaNivel): ResultadoNivel {
-  if (entrada.manual === MANUAL_REFERENCIA_ESTRUTURA) {
-    throw new Error(
-      "ME 2 1_05 é referência de estrutura (144 padrões no mapeamento) e não entra em calcularNivel.",
-    );
-  }
-  if (entrada.manual !== MANUAL_OPERACIONAL) {
-    throw new Error(`calcularNivel só usa a contagem do ${MANUAL_OPERACIONAL}.`);
-  }
-
   const limiares = entrada.limiares ?? LIMIARES_ME_5_1_07;
   const escopo = new Set(gruposNoEscopo(entrada.tipo));
   const vistos = new Set<string>();
@@ -213,7 +204,7 @@ export function calcularNivel(entrada: EntradaNivel): ResultadoNivel {
   );
 
   return {
-    manual: MANUAL_OPERACIONAL,
+    manual: entrada.manual,
     tipo: entrada.tipo,
     nivel: conceder(grupos, entrada.tipo),
     grupos,

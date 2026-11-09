@@ -38,7 +38,7 @@ export function AcsasApp() {
               <option value="resp">Responsável do projeto</option>
               <option value="upload">Responsável pelo upload</option>
               <option value="conf">Conferente</option>
-              <option value="chan">Autorizador (chancela)</option>
+              <option value="chan">Autorizador</option>
             </optgroup>
             <optgroup label="IBES">
               <option value="back">Backoffice IBES</option>
@@ -46,6 +46,7 @@ export function AcsasApp() {
               <option value="lider">Avaliador líder</option>
               <option value="comite">Membro do Comitê · F</option>
               <option value="comite2">Membro do Comitê · G</option>
+              <option value="comite3">Membro do Comitê · H</option>
               <option value="admin">Administrador IBES</option>
             </optgroup>
           </select>

@@ -112,13 +112,16 @@ describe("calcularNivel", () => {
     assert.equal(resultado.nivel, "excelente");
   });
 
-  it("recusa o manual de 144 padrões e qualquer manual que não seja o ME 5 1_07", () => {
+  it("aceita o manual importado e não usa 144 como denominador", () => {
     const base = entradaDaAvaliacao(projeto, rodada2.id);
-    assert.throws(
-      () => calcularNivel({ ...base, manual: MANUAL_REFERENCIA_ESTRUTURA }),
-      /referência de estrutura/,
-    );
-    assert.throws(() => calcularNivel({ ...base, manual: "ME 5 1_08" }), /ME 5 1_07/);
+    const me2 = calcularNivel({ ...base, manual: MANUAL_REFERENCIA_ESTRUTURA });
+    const outro = calcularNivel({ ...base, manual: "ME 28 1_01" });
+    assert.equal(me2.manual, MANUAL_REFERENCIA_ESTRUTURA);
+    assert.equal(me2.catalogoContado, base.padroes.length);
+    assert.notEqual(me2.catalogoContado, CONTAGEM_REFERENCIA_ESTRUTURA);
+    assert.equal(me2.referenciaEstruturaIgnorada.padroes, 144);
+    assert.equal(outro.manual, "ME 28 1_01");
+    assert.equal(outro.catalogoContado, base.padroes.length);
   });
 
   it("não cobra obrigatório que saiu do grupo e não sobe de nível nos outros grupos", () => {
