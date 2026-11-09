@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { caminhoNoBucket, interpretarDataExtracao, lerIndiceDocumentos, LIMITE_ARQUIVO_NOVO_BYTES } from "./projetos";
+import { caminhoNoBucket, interpretarDataExtracao, lerIndiceDocumentos, LIMITE_ARQUIVO_NOVO_BYTES, tamanhoEmBytes } from "./projetos";
 
 const documento = {
   id_fichero: 10,
@@ -45,10 +45,12 @@ describe("índice de documentos", () => {
     expect(() => interpretarDataExtracao("2026-08-12")).toThrow(/inválida/);
   });
 
-  it("limita o arquivo novo a 20 MB e monta o caminho do bucket", () => {
-    expect(LIMITE_ARQUIVO_NOVO_BYTES).toBe(20 * 1024 * 1024);
+  it("limita o arquivo novo a 25 MB e guarda o histórico em id_origem", () => {
+    expect(LIMITE_ARQUIVO_NOVO_BYTES).toBe(25 * 1024 * 1024);
     expect(caminhoNoBucket("22222222-2222-4222-8222-222222222222", "10")).toBe(
       "projeto/22222222-2222-4222-8222-222222222222/id_origem/10",
     );
+    expect(tamanhoEmBytes("1,5")).toBe(1536);
+    expect(tamanhoEmBytes("77971")).toBe(77971);
   });
 });

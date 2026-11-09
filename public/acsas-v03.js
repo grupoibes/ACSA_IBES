@@ -71,15 +71,15 @@ const BMAP = Object.fromEntries(BLOCOS.map(b => [b[0], b]));
 const CLASSES = ['Procedimento','Ata','Registro de treinamento','Relatório de auditoria','Indicador','Política','Contrato'];
 const PAPEIS = {
   resp:{n:'Paula Ribeiro', l:'Responsável do projeto', cli:true}, upload:{n:'Carlos Menezes', l:'Responsável pelo upload', cli:true},
-  conf:{n:'Luana Prado', l:'Conferente', cli:true}, chan:{n:'Fernando Lopes', l:'Autorizador (chancela)', cli:true},
-  back:{n:'Backoffice IBES', l:'Backoffice IBES'}, aval:{n:'Avaliador B', l:'Avaliador'}, lider:{n:'Avaliadora A', l:'Avaliador líder'}, comite:{n:'Membro F', l:'Membro do Comitê de Certificação'}, comite2:{n:'Membro G', l:'Membro do Comitê de Certificação'}, admin:{n:'Administração IBES', l:'Administrador IBES'}
+  conf:{n:'Luana Prado', l:'Conferente', cli:true}, chan:{n:'Fernando Lopes', l:'Autorizador', cli:true},
+  back:{n:'Backoffice IBES', l:'Backoffice IBES'}, aval:{n:'Avaliador B', l:'Avaliador'}, lider:{n:'Avaliadora A', l:'Avaliador líder'}, comite:{n:'Membro F', l:'Membro do Comitê de Certificação'}, comite2:{n:'Membro G', l:'Membro do Comitê de Certificação'}, comite3:{n:'Membro H', l:'Membro do Comitê de Certificação'}, admin:{n:'Administração IBES', l:'Administrador IBES'}
 };
 const ROM = ['','I','II','III','IV','V'];
 const ETAPAS_BASE = ['Diagnóstico','Solicitação','Autoavaliação','Avaliação','Certificação'];
 const E = {DIAG:0, SOL:1, AUTO:2, AVAL:3, CERT:4};
 const ESTADOS = ['Em curso','Acreditado','Recusado','Abandonado','Vencido','Cancelado','Pendente','Suspensão','Retirado','Denegado'];
 const RES = {em_curso:'Em curso', positiva:'Positiva', negativa:'Negativa'};
-const QUORUM = 2;
+const QUORUM = 3;
 const PRAZO0 = {'Diagnóstico':'2025-09-12','Solicitação':'2025-10-14','Autoavaliação':'2026-12-15','Avaliação':'2027-02-26','Certificação':'2027-03-31'};
 const CHK = ['ES 5 10.04_02', QUEDAS, 'ES 5 01.04_02', 'ES 5 03.01_02', 'ES 5 08.01_02', 'ES 5 11.01_02'];
 
@@ -96,7 +96,7 @@ function inicial() {
   const cumpridos = [...gi.filter(p => p.ob && p.id !== QUEDAS), ...gi.filter(p => !p.ob).slice(0, 7)];
   let k = 0;
   const ev = (t, ds, etapa, dia, extra) => ({id:'E' + (++k), t, docs:ds, autor:'Carlos Menezes', d:dia + ' 09:' + String(10 + (k % 40)).padStart(2, '0'), etapa,
-    conf: etapa !== 'Enviada' ? {u:'Luana Prado', d:addDias(dia, 2) + ' 14:05'} : null, chan: etapa === 'Chancelada' ? {u:'Fernando Lopes', d:addDias(dia, 4) + ' 11:30'} : null, ...(extra || {})});
+    conf: etapa !== 'Enviada' ? {u:'Luana Prado', d:addDias(dia, 2) + ' 14:05'} : null, chan: etapa === 'Chancelada' ? {u:'Backoffice IBES', d:addDias(dia, 4) + ' 11:30'} : null, ...(extra || {})});
   cumpridos.forEach((p, i) => {
     st[p.id] = 'C'; resp[p.id] = {bin:'sim', qual:'Atende aos elementos avaliáveis. Ver evidências vinculadas.'};
     evid[p.id] = [ev('Documentos vinculados respondem aos elementos avaliáveis deste padrão.', [docs[i % 12].id], 'Chancelada', addDias('2026-05-04', i % 60))];
@@ -137,7 +137,7 @@ function inicial() {
       ['2026-10-14 16:40','Luana Prado','Conferente','Evidência','Evidência conferida',PAD.filter(p => p.g === 'II')[0].id],
       ['2026-10-09 10:40','Luana Prado','Conferente','Evidência','Evidência devolvida: documento sem data e sem assinatura',PAD.filter(p => p.g === 'II')[2].id],
       ['2026-10-09 10:41','Sistema','—','E-mail','E-mail de devolução enviado ao Responsável pelo upload',''],
-      ['2026-10-02 11:30','Fernando Lopes','Autorizador (chancela)','Evidência','Evidência chancelada','ES 5 10.04_02'],
+      ['2026-10-02 11:30','Fernando Lopes','Autorizador','Evidência','Evidência conferida','ES 5 10.04_02'],
       ['2026-04-09 08:00','Backoffice IBES','Backoffice IBES','Etapa','Etapa alterada: Solicitação → Autoavaliação','Projeto 2025/009'],
       ['2026-04-09 08:01','Sistema','—','E-mail','E-mail de início da autoavaliação enviado ao Responsável do projeto',''],
       ['2025-09-15 10:00','Backoffice IBES','Backoffice IBES','Diagnóstico','Diagnóstico registrado: 2 padrões não se aplicam','Projeto 2025/009'],
@@ -182,12 +182,25 @@ const travado = () => cliente() && !!restricao();
 function permBloco(id) { if (S.papel !== 'upload') return 'redacao'; return S.perm.u1[PMAP[id].bloco]; }
 const podeResponder = id => !travado() && (S.papel === 'resp' || (S.papel === 'upload' && permBloco(id) === 'redacao'));
 const podeVer = id => !(S.papel === 'upload' && permBloco(id) === 'sem');
-const podeConferir = () => !travado() && S.papel === 'conf';
-const podeChancelar = () => !travado() && S.papel === 'chan';
+const podeConferir = () => !travado() && (S.papel === 'conf' || S.papel === 'chan');
+const podeChancelar = () => !travado() && ['back', 'admin', 'aval', 'lider'].includes(S.papel);
 const ibesEtapa = () => S.papel === 'back' || S.papel === 'admin';
 const podeNA = () => ['back','admin'].includes(S.papel);
 const vePadrao = id => !(cliente() && S.st[id] === 'NA');
-const membroComite = () => S.papel === 'comite' || S.papel === 'comite2';
+const membroComite = () => S.papel === 'comite' || S.papel === 'comite2' || S.papel === 'comite3';
+function estadoAnexo(id) {
+  const ev = S.evid[id] || [];
+  if (!ev.length) return 'ausente';
+  if (ev.some(e => e.etapa === 'Chancelada')) return 'chancelada';
+  return 'pendente';
+}
+const seloAnexo = id => {
+  if (S.st[id] === 'NA') return '';
+  const estado = estadoAnexo(id);
+  if (estado === 'ausente') return '<span class="chip c-bad">Ausente</span>';
+  if (estado === 'pendente') return '<span class="chip c-warn">Pendente</span>';
+  return '';
+};
 const manutAtual = () => { const v = S.visitas[0]; return !!v && v.tipo.startsWith('Manutenção'); };
 const chkv = () => CHK.filter(id => S.st[id] !== 'NA' && (!manutAtual() || PMAP[id].g !== 'III'));
 const resolRodada = () => S.resols.find(r => r.rodada === S.aval.rodada);
@@ -256,10 +269,10 @@ function frame() {
   pm.style.display = '';
   S.naN = PAD.filter(p => S.st[p.id] === 'NA').length;
   const pend = PAD.filter(p => S.st[p.id] === 'PTE').length, venc = S.areas.filter(vencida).length;
-  const fila = Object.values(S.evid).flat().filter(e => e.etapa === (S.papel === 'chan' ? 'Conferida' : 'Enviada')).length;
+  const fila = Object.values(S.evid).flat().filter(e => e.etapa === (podeChancelar() ? 'Conferida' : 'Enviada')).length;
   const it = (v, l, icon, badge) => `<button type="button" data-act="go" data-v="${v}" ${S.view === v ? 'aria-current="page"' : ''}>${ic(icon)}<span>${l}</span>${badge ? `<span class="badge chip c-neu num">${badge}</span>` : ''}</button>`;
   pm.innerHTML = `<h3>Projeto</h3>${it('ficha','Ficha do projeto',I.file)}${cliente() ? '' : it('diagnostico','Diagnóstico e escopo',I.scope, S.naN || '')}${it('workflow','Workflow e prazos',I.steps, bloqueios().length ? 'bloq.' : '')}${it('usuarios','Usuários',I.users)}${it('indicadores','Indicadores',I.gauge)}${it('log','Painel de log',I.log)}
-    <h3>Autoavaliação</h3>${it('auto','Painel da autoavaliação',I.list, pend)}${it('padrao','Ficha de autoavaliação',I.clip2, ['conf','chan'].includes(S.papel) && fila ? fila + ' na fila' : '')}${it('biblioteca','Biblioteca de documentos',I.folder, S.docs.length)}${it('autoav','Atribuição por critério',I.grid)}${it('melhoria','Planos de ação',I.flag, venc ? venc + ' venc.' : '')}${it('relatorios','Relatórios e listas',I.chart)}
+    <h3>Autoavaliação</h3>${it('auto','Painel da autoavaliação',I.list, pend)}${it('padrao','Ficha de autoavaliação',I.clip2, (['conf','chan'].includes(S.papel) || podeChancelar()) && fila ? fila + ' na fila' : '')}${it('biblioteca','Biblioteca de documentos',I.folder, S.docs.length)}${it('autoav','Atribuição por critério',I.grid)}${it('melhoria','Planos de ação',I.flag, venc ? venc + ' venc.' : '')}${it('relatorios','Relatórios e listas',I.chart)}
     <h3>Avaliação</h3>${it('avaliacao','Agendamento e relatório',I.pin)}${it('comite','Comitê de Certificação',I.check, membroComite() && S.aval.res === 'positiva' && !resolRodada() ? 'pendente' : '')}`;
 }
 
@@ -299,7 +312,7 @@ function vFicha(c) {
       '<p class="muted" style="font-size:12px">Etapas realizadas em verde, futuras em cinza. O avanço de etapa é feito pelo IBES.</p>')}
   <div class="grid2">
     ${sec('Entidade', kv([['Nome do centro','Hospital Modelo de Demonstração'],['Unidade de saúde','Unidade de Internação Adulto'],['Tipo de unidade','Hospital geral'],['Grupo','Rede Exemplo de Saúde']]))}
-    ${sec('Responsáveis', kv([['Responsável do projeto','Paula Ribeiro'],['Autorizador (chancela)','Fernando Lopes'],['IBES · Backoffice','Backoffice IBES'],['Avaliador líder','Avaliadora A']]))}
+    ${sec('Responsáveis', kv([['Responsável do projeto','Paula Ribeiro'],['Autorizador','Fernando Lopes'],['IBES · Backoffice','Backoffice IBES'],['Avaliador líder','Avaliadora A']]))}
   </div>
   ${sec('Estado do projeto', kv([['Estado atual', `<span class="chip c-info">${S.estado}</span>`]]) +
     (ibesEtapa() ? `<form class="form" id="f-est" novalidate style="margin:16px -16px 0"><div class="frow"><div class="field"><label for="est-sel">Novo estado</label><select id="est-sel">${ESTADOS.map(o => `<option ${S.estado === o ? 'selected' : ''}>${o}</option>`).join('')}</select></div>
@@ -323,14 +336,14 @@ function vWorkflow(c) {
       <p class="muted" style="font-size:12px;margin-top:8px">O IBES confirmou 1 manutenção aos 30 meses e recertificação aos 60 meses. A lista de 22/10 fala em 1 a 3 manutenções: o seletor fica até a confirmação.</p><p class="muted" style="font-size:12px;margin-top:8px">O estado do projeto é alterado na Ficha do projeto, com motivo e histórico.</p>
       <div style="margin-top:16px">${kv([['Nível calculado', nivelHtml(c.nivel)],['Nível final', S.nivelFinal ? nivelHtml(S.nivelFinal) : '<span class="muted">Aguarda o Comitê</span>']])}</div><p class="muted" style="font-size:12px;margin-top:8px">O sistema calcula o nível. O nível final sai da resolução do Comitê de Certificação do IBES, com justificativa quando for diferente do calculado.</p>`)}
     ${sec('E-mails automáticos', `<div class="tbl"><table><thead><tr><th>Quando</th><th>Para</th></tr></thead><tbody>
-      ${[['Mudança de etapa','Responsável do projeto'],['Agendamento da avaliação','Cliente e equipe avaliadora'],['Evidência devolvida','Responsável pelo upload'],['Evidência conferida','Autorizador (chancela)'],['Prazo da etapa em 15 dias','Responsável do projeto'],['Vencimento da certificação','Responsável do projeto e Backoffice'],['Candidatura validada ou recusada','Solicitante'],['Nova rodada de avaliação','Responsável do projeto e equipe avaliadora'],['Resolução do Comitê do IBES','Responsável do projeto e Backoffice'],['Certificado disponível','Responsável do projeto']].map(r => `<tr><td>${r[0]}</td><td>${r[1]}</td></tr>`).join('')}</tbody></table></div><p class="muted" style="font-size:12px;padding:8px 16px 12px">Lista provisória: os gatilhos definitivos dependem da pendência 11.</p>`, '', true)}
+      ${[['Mudança de etapa','Responsável do projeto'],['Agendamento da avaliação','Cliente e equipe avaliadora'],['Evidência devolvida','Responsável pelo upload'],['Evidência conferida','Backoffice, Administrador, Tutor, Avaliador ou Avaliador líder'],['Prazo da etapa em 15 dias','Responsável do projeto'],['Vencimento da certificação','Responsável do projeto e Backoffice'],['Candidatura validada ou recusada','Solicitante'],['Nova rodada de avaliação','Responsável do projeto e equipe avaliadora'],['Resolução do Comitê do IBES','Responsável do projeto e Backoffice'],['Certificado disponível','Responsável do projeto']].map(r => `<tr><td>${r[0]}</td><td>${r[1]}</td></tr>`).join('')}</tbody></table></div><p class="muted" style="font-size:12px;padding:8px 16px 12px">Lista provisória: os gatilhos definitivos dependem da pendência 11.</p>`, '', true)}
   </div>`;
 }
 
 /* ---------- usuários ---------- */
 function vUsuarios() {
   const pode = S.papel === 'resp' || ibesEtapa(), ativos = S.usuarios.filter(u => u.a).length;
-  const perfis = {resp:'Responsável do projeto', upload:'Responsável pelo upload', conf:'Conferente', chan:'Autorizador (chancela)'};
+  const perfis = {resp:'Responsável do projeto', upload:'Responsável pelo upload', conf:'Conferente', chan:'Autorizador'};
   return `<div class="phead"><div><h1>Usuários</h1><p>Usuários do cliente (até 40 por cliente) e equipe do IBES ligada ao projeto.</p></div></div>
   ${sec('Usuários do cliente', `<div class="tbl"><table><thead><tr><th>Nome</th><th>Perfil</th><th>Situação</th><th><span class="sr">Ação</span></th></tr></thead><tbody>
     ${S.usuarios.map((u, i) => `<tr><td>${esc(u.n)}</td><td>${perfis[u.p]}</td><td>${u.a ? '<span class="chip c-C">Ativo</span>' : '<span class="chip c-neu">Inativo</span>'}</td><td class="n"><button type="button" class="btn sm" data-act="cred" data-v="${i}" ${pode && u.a ? '' : 'disabled'}>Enviar credenciais</button></td></tr>`).join('')}</tbody></table></div>
@@ -391,7 +404,8 @@ function listaPadroes() {
     const bh = eixo !== eixoAnt ? `<div class="bh"><span class="sq e${eixo}" aria-hidden="true"></span>Bloco ${ROM[eixo]}</div>` : ''; eixoAnt = eixo;
     return `${bh}<div class="blk"><button type="button" class="blk-h" data-act="bloco" data-v="${n}" aria-expanded="${aberto}"><span class="chev">${ic(I.chev)}</span><span class="t"><span class="muted" style="font-size:12px">Critério</span> ${n} · ${nome}</span><span class="chip ${apl.length && ok === apl.length ? 'c-C' : 'c-neu'} num">${ok}/${apl.length}</span></button>
       ${aberto ? vis.map(p => { const fila = (S.evid[p.id] || []).find(e => e.etapa === 'Enviada' || e.etapa === 'Conferida' || e.etapa === 'Devolvida');
-        return `<button type="button" class="std" data-act="padrao" data-v="${p.id}" aria-current="${p.id === S.std}"><span class="m"><span class="mono">${p.id}</span><small>Grupo ${p.g}${p.ob ? ' · Obrigatório' : ''}${S.st[p.id] === 'NA' ? ' · Não se aplica' : respondido(p.id) ? ' · Respondido' : ''}${fila ? ' · evidência ' + fila.etapa.toLowerCase() : ''}</small><span class="tt">${p.t}</span></span>${chip(S.st[p.id])}</button>`; }).join('') : ''}</div>`;
+        const anexo = S.st[p.id] === 'NA' ? '' : estadoAnexo(p.id) === 'ausente' ? ' · Ausente' : estadoAnexo(p.id) === 'pendente' ? ' · Pendente' : '';
+        return `<button type="button" class="std" data-act="padrao" data-v="${p.id}" aria-current="${p.id === S.std}"><span class="m"><span class="mono">${p.id}</span><small>Grupo ${p.g}${p.ob ? ' · Obrigatório' : ''}${S.st[p.id] === 'NA' ? ' · Não se aplica' : respondido(p.id) ? ' · Respondido' : ''}${anexo}${fila ? ' · evidência ' + fila.etapa.toLowerCase() : ''}</small><span class="tt">${p.t}</span></span>${chip(S.st[p.id])}${seloAnexo(p.id)}</button>`; }).join('') : ''}</div>`;
   }).join('') || '<div class="empty">Nenhum padrão atende aos filtros. Marque outro grupo ou limpe a busca.</div>';
 }
 function resumoTabela(c, n) {
@@ -444,7 +458,7 @@ function vPadrao(c) {
   const podeCumpre = !travado() && (S.papel === 'chan' || S.papel === 'resp'), base = temBase(p.id);
   const docsF = S.docs.filter(d => !S.bibF || d.c === S.bibF);
   return `<div class="phead"><div><div class="crumb" style="margin-bottom:6px"><span class="sq e${b[2]}" aria-hidden="true"></span><span>ME 5 1_07</span><span class="sep" aria-hidden="true">›</span><span>Bloco ${ROM[b[2]]}</span><span class="sep" aria-hidden="true">›</span><span>Critério ${b[0]} · ${b[1]}</span><span class="sep" aria-hidden="true">›</span><span>Padrão</span></div>
-      <h1><span class="mono" style="font-size:24px">${p.id}</span></h1><p>${p.t} · Grupo ${p.g}${p.ob ? ' · Obrigatório' : ''} · ${chip(st)}</p></div>
+      <h1><span class="mono" style="font-size:24px">${p.id}</span></h1><p>${p.t} · Grupo ${p.g}${p.ob ? ' · Obrigatório' : ''} · ${chip(st)} ${seloAnexo(p.id)}</p></div>
     <div class="navstd"><button type="button" class="btn" data-act="padrao" data-v="${ant ? ant.id : ''}" ${ant ? '' : 'disabled'}>${ic(I.left)}<span class="mono">${ant ? ant.id : 'Início'}</span></button><button type="button" class="btn" data-act="padrao" data-v="${prox ? prox.id : ''}" ${prox ? '' : 'disabled'}><span class="mono">${prox ? prox.id : 'Fim'}</span>${ic(I.chev)}</button></div></div>
   ${avisoRestricao()}
   ${!p.det ? '<div class="note n-info">Padrão de demonstração: definição e elementos vêm do manual importado pelo IBES. ES 5 01.04_02, ES 5 10.04_02 e ES 5 10.06_01 têm conteúdo completo de exemplo.</div>' : ''}
@@ -474,7 +488,7 @@ function vPadrao(c) {
   <section class="sec"><div class="cbar">
     <p class="prose" style="font-size:14px">${st === 'NA' ? 'Padrão não aplicável, definido no Diagnóstico: sai do total e do mínimo do cálculo de nível e não aparece para a unidade.' : st === 'C' ? 'Padrão marcado como cumprido.' : base ? 'Resposta "Sim" e evidência chancelada: o padrão pode ser marcado como cumprido.' : 'Para marcar Cumpre: resposta "Sim" e ao menos uma evidência chancelada (ou área de melhoria concluída).'}</p>
     <div class="fact">${st === 'NA' ? `<button type="button" class="btn" data-act="go" data-v="diagnostico" ${podeNA() ? '' : 'disabled'}>Ver no Diagnóstico</button>` : st === 'C' ? `<button type="button" class="btn" data-act="desmarcar" ${podeCumpre ? '' : 'disabled'}>Desmarcar cumprimento</button>` : `<button type="button" class="btn cumpre" data-act="cumpre" ${podeCumpre && base ? '' : 'disabled'}>${ic(I.check)}Cumpre</button>`}</div>
-  </div>${st !== 'NA' && !podeCumpre ? '<div class="note n-info" style="margin:0 16px 16px">Quem marca Cumpre é o Autorizador (chancela) ou o Responsável do projeto.</div>' : ''}
+  </div>${st !== 'NA' && !podeCumpre ? '<div class="note n-info" style="margin:0 16px 16px">Quem marca Cumpre é o Autorizador ou o Responsável do projeto. A chancela da evidência é do IBES.</div>' : ''}
   ${st === 'NA' && S.na[p.id] ? `<p class="muted" style="font-size:12px;padding:0 16px 16px">Definido no ${esc(S.na[p.id].o || 'Diagnóstico')} por ${esc(S.na[p.id].u)} em ${brdt(S.na[p.id].d)}.</p>` : ''}
   <p class="muted" style="font-size:12px;padding:0 16px 16px">Não se aplica sai do Diagnóstico feito pelo avaliador e é registrado pelo IBES. A unidade não vê esses padrões (confirmado pelo IBES em 26/10).</p></section>`}`;
 }
@@ -574,9 +588,10 @@ function vComite(c) {
   const dec = {conceder:'Conceder a certificação', negar:'Não conceder', resposta:'Pedir resposta do requerente'};
   const par = S.pareceres.filter(p => p.rodada === S.aval.rodada), meu = par.find(p => p.u === eu().n), resol = resolRodada();
   const votos = Object.keys(dec).map(k => [k, par.filter(p => p.voto === k).length]).sort((a, b) => b[1] - a[1]);
-  const maioria = par.length && votos[0][1] > par.length / 2 ? votos[0][0] : null;
+  const maioria = par.length >= QUORUM && votos[0][1] === par.length ? votos[0][0] : null;
+  const semConsenso = par.length >= QUORUM && !maioria;
   const pont = ver.length ? pct(conf, ver.length) : '—';
-  const podeParecer = membro && liberado && !meu && !resol, podeResolver = membro && liberado && !resol && par.length >= QUORUM;
+  const podeParecer = membro && liberado && !meu && !resol, podeResolver = membro && liberado && !resol && !!maioria;
   const sit = id => { const a = S.achados[id] || {}, n = (S.evid[id] || []).filter(e => e.etapa === 'Chancelada').length;
     if (!a.r) return '<span class="chip c-neu">Sem resultado</span>';
     if (a.r === 'n' || a.r === 'nm') return '<span class="chip c-bad">Não cumpre</span>';
@@ -584,7 +599,7 @@ function vComite(c) {
   const rotRes = {c:'Cumpre', n:'Não cumpre', m:'Mantém', nm:'Não mantém'};
   return `<div class="phead"><div><h1>Comitê de Certificação do IBES</h1><p>Segunda análise depois do relatório do avaliador. Os membros conferem relatório e evidências, registram parecer e votam; a resolução define o resultado e o nível. Rodada ${S.aval.rodada}.</p></div></div>
   ${liberado ? '' : `<div class="note n-warn">O Comitê só analisa avaliação com resultado Positiva. Resultado atual da rodada ${S.aval.rodada}: ${RES[S.aval.res]}. O Avaliador líder registra o resultado em Agendamento e relatório.</div>`}
-  ${membro ? '' : '<div class="note n-info">Somente membros do Comitê registram parecer e resolução. Troque o perfil no topo para Membro do Comitê · F ou · G.</div>'}
+  ${membro ? '' : '<div class="note n-info">Somente membros do Comitê registram parecer e resolução. Troque o perfil no topo para Membro do Comitê · F, · G ou · H.</div>'}
   ${sec('Relatório × evidências', `<div class="tbl"><table><thead><tr><th>Padrão</th><th>Resultado do avaliador</th><th>Observação</th><th class="n">Evidências chanceladas</th><th>Conferência</th></tr></thead><tbody>
     ${K.map(id => { const a = S.achados[id] || {}; return `<tr><td>${stdLink(id)}<br><span class="muted" style="font-size:12px">${PMAP[id].t}</span></td><td>${a.r ? rotRes[a.r] : '<span class="muted">—</span>'}</td><td>${a.obs ? esc(a.obs) : '<span class="muted">—</span>'}</td><td class="n">${(S.evid[id] || []).filter(e => e.etapa === 'Chancelada').length}</td><td>${sit(id)}</td></tr>`; }).join('')}</tbody></table></div>`,
     `<span class="chip c-neu num">${ver.length}/${K.length} verificados</span>`, true)}
@@ -598,18 +613,18 @@ function vComite(c) {
         <p class="err" id="pv-err" hidden></p><div class="fact"><button type="submit" class="btn pri">Registrar parecer</button></div></form>`
       : membro && meu && !resol ? '<p class="muted" style="font-size:12px;padding:8px 16px 12px">Seu parecer desta rodada já está registrado.</p>' : ''),
       `<span class="chip ${par.length >= QUORUM ? 'c-C' : 'c-neu'} num">${par.length}/${QUORUM}</span>`, true)}
-    ${sec('Resolução', kv([['Nível calculado', nivelHtml(c.nivel)],['Pontuação (% conforme na avaliação)', `<span class="num">${pont}</span>`],['Maioria dos pareceres', maioria ? dec[maioria] : '<span class="muted">Sem maioria ainda</span>']]).replace('class="kv"', 'class="kv" style="grid-template-columns:1fr"') +
-      (resol ? `<div style="margin-top:16px;padding-top:16px;border-top:1px solid var(--line)">${kv([['Resolução', `<span class="mono">${esc(resol.num)}</span> · ${brdt(resol.d)}`],['Decisão', dec[resol.dec]],['Nível final', resol.dec === 'conceder' ? nivelHtml(resol.niv) : '—'],['Certificado', resol.dec === 'conceder' && S.cert ? `válido até <span class="num">${br(S.cert.validade)}</span>` : '—'],['Justificativa', resol.just ? esc(resol.just) : '<span class="muted">Sem justificativa (igual à maioria e ao nível calculado)</span>']]).replace('class="kv"', 'class="kv" style="grid-template-columns:1fr"')}</div>` : '') +
+    ${sec('Resolução', kv([['Nível calculado', nivelHtml(c.nivel)],['Pontuação (% de cumprimento dos padrões)', `<span class="num">${pont}</span>`],['Consenso dos pareceres', maioria ? dec[maioria] : semConsenso ? '<span class="chip c-bad">Sem consenso</span>' : `<span class="muted">Aguardando ${QUORUM} pareceres</span>`]]).replace('class="kv"', 'class="kv" style="grid-template-columns:1fr"') +
+      (resol ? `<div style="margin-top:16px;padding-top:16px;border-top:1px solid var(--line)">${kv([['Resolução', `<span class="mono">${esc(resol.num)}</span> · ${brdt(resol.d)}`],['Decisão', dec[resol.dec]],['Nível final', resol.dec === 'conceder' ? nivelHtml(resol.niv) : '—'],['Certificado', resol.dec === 'conceder' && S.cert ? `válido até <span class="num">${br(S.cert.validade)}</span>` : '—'],['Justificativa', resol.just ? esc(resol.just) : '<span class="muted">Sem justificativa (igual ao consenso e ao nível calculado)</span>']]).replace('class="kv"', 'class="kv" style="grid-template-columns:1fr"')}</div>` : '') +
       (podeResolver ? `<form class="form" id="f-res" novalidate style="margin:16px -16px -16px"><span class="req">* obrigatório</span>
         <fieldset style="border:0;margin:0;padding:0"><legend class="muted" style="font-size:12px;font-weight:500;padding:0;margin-bottom:4px">Decisão *</legend><div class="radios" style="flex-direction:column;gap:2px">${Object.entries(dec).map(([k, l]) => `<label for="rs-${k}"><input type="radio" name="rs" id="rs-${k}" value="${k}" ${k === (maioria || 'conceder') ? 'checked' : ''}>${l}</label>`).join('')}</div></fieldset>
         <div class="frow"><div class="field"><label for="rs-niv">Nível final</label><select id="rs-niv">${NIV.map(n => `<option ${n === (c.nivel || 'Avançado') ? 'selected' : ''}>${n}</option>`).join('')}</select></div>
           <div class="field"><label for="rs-num">Número da resolução *</label><input id="rs-num" type="text" placeholder="Ex.: IBES 2026/041" autocomplete="off"></div></div>
-        <div class="field"><label for="rs-just">Justificativa</label><textarea id="rs-just" style="min-height:60px" placeholder="Obrigatória quando a decisão diverge da maioria ou o nível difere do calculado"></textarea></div>
+        <div class="field"><label for="rs-just">Justificativa</label><textarea id="rs-just" style="min-height:60px" placeholder="Obrigatória quando a decisão diverge do consenso ou o nível difere do calculado"></textarea></div>
         <p class="err" id="rs-err" hidden></p><div class="fact"><button type="submit" class="btn pri">Registrar resolução</button></div></form>`
-      : !resol && membro && liberado ? `<div class="note n-info" style="margin-top:12px">Resolução liberada com ${QUORUM} pareceres. Faltam ${Math.max(0, QUORUM - par.length)}.</div>` : ''),
+      : !resol && semConsenso ? '<div class="note n-warn" style="margin-top:12px">Os 3 pareceres não chegaram a consenso. A resolução fica bloqueada até o IBES definir o que fazer nesse caso (pendência 34).</div>' : !resol && membro && liberado ? `<div class="note n-info" style="margin-top:12px">Resolução liberada com ${QUORUM} pareceres concordantes. Faltam ${Math.max(0, QUORUM - par.length)}.</div>` : ''),
       resol ? '<span class="chip c-C">Registrada</span>' : '')}
   </div>
-  <div class="note n-info">Regra provisória até a pendência 33: resolução liberada com pareceres de ${QUORUM} membros, decisão pela maioria e declaração de conflito de interesse em cada parecer. "Pontuação" = % conforme na avaliação até o IBES definir (pendência 23). Pedido de resposta devolve o registro ao Avaliador líder.</div>
+  <div class="note n-info">Três membros analisam o projeto e a decisão é por consenso. Sem consenso, a resolução fica bloqueada (pendência 34). Declaração de conflito de interesse continua em cada parecer (pendência 33). "Pontuação" = % de cumprimento dos padrões até o IBES definir (pendência 23).</div>
   ${S.resols.length ? sec('Histórico de resoluções', `<div class="tbl"><table><thead><tr><th>Resolução</th><th>Rodada</th><th>Data</th><th>Decisão</th><th>Nível final</th></tr></thead><tbody>${S.resols.map(r => `<tr><td class="mono">${esc(r.num)}</td><td class="num">${r.rodada || 1}</td><td class="num">${brdt(r.d)}</td><td>${dec[r.dec]}</td><td>${r.dec === 'conceder' ? r.niv : '—'}</td></tr>`).join('')}</tbody></table></div>`, '', true) : ''}`;
 }
 
@@ -640,9 +655,9 @@ const TESTES = [
   ['T1','Entrada e logotipo','Clique em Sair, confira a tela de entrada e entre no sistema.','Logotipo grande na entrada e em tamanho normal no canto superior esquerdo das páginas internas, sem distorção.'],
   ['T2','Diagnóstico define Não se aplica','Perfil Backoffice IBES › Diagnóstico e escopo › marque um padrão do critério 01.','O total aplicável cai 1, o padrão sai do mínimo e o registro aparece no Painel de log.'],
   ['T3','Unidade não vê padrões N/A','Troque para Responsável do projeto › Painel da autoavaliação.','Padrões não aplicáveis somem da lista e da navegação; não existe botão Não se aplica.'],
-  ['T4','Fluxo da evidência','Responsável pelo upload envia › Conferente confere › Autorizador chancela.','Cada passo grava usuário, data e hora. Cumpre só libera com resposta Sim e evidência chancelada.'],
+  ['T4','Fluxo da evidência','Responsável pelo upload envia › Conferente ou Autorizador confere › IBES chancela.','Cada passo grava usuário, data e hora. Cumpre só libera com resposta Sim e evidência chancelada. O Autorizador não chancela.'],
   ['T5','Avaliação negativa abre nova rodada','Avaliador líder › Agendamento e relatório › Resultado Negativa. Backoffice › Abrir rodada 2.','Mesmo projeto e código; resultados do avaliador zerados; evidências mantidas; histórico de rodadas.'],
-  ['T6','Comitê do IBES','Avaliador líder marca Positiva. Membro F e Membro G registram parecer. Um deles registra a resolução.','Resolução só libera com 2 pareceres; justificativa exigida quando diverge; certificado válido por 5 anos.'],
+  ['T6','Comitê do IBES','Avaliador líder marca Positiva. Membros F, G e H registram parecer. Um deles registra a resolução.','Resolução só libera com 3 pareceres concordantes. Sem consenso, fica bloqueada. Justificativa exigida quando o nível difere do calculado. Certificado válido por 5 anos.'],
   ['T7','Manutenção só Grupos I e II','Backoffice › agende avaliação do tipo Manutenção 1.','O relatório do avaliador lista só padrões aplicáveis dos Grupos I e II.'],
   ['T8','Estado manual do projeto','Administrador IBES › Ficha do projeto › estado Recusado ou Abandonado com motivo. Repita com um perfil do cliente.','Só o IBES altera; motivo obrigatório; histórico com usuário, data e hora.'],
   ['T9','Workflow e bloqueios','Backoffice › Workflow e prazos › Avançar.','Diagnóstico e Recertificação aparecem; realizadas em verde, futuras em cinza; avanço bloqueado com pendência.'],
@@ -713,7 +728,7 @@ document.addEventListener('click', e => {
   else if (a === 'cumpre') { if (!temBase(S.std)) { toast('Registre resposta "Sim" e uma evidência chancelada para marcar Cumpre'); return; } const antes = calc().nivel; S.st[S.std] = 'C'; log('Resposta', 'Padrão marcado como cumprido', S.std); const depois = calc().nivel; render(); toast(antes !== depois ? `Padrão cumprido. Projeção de nível: ${depois || 'abaixo de Avançado'}` : 'Padrão marcado como cumprido'); }
   else if (a === 'desmarcar') { S.st[S.std] = 'PTE'; log('Resposta', 'Cumprimento removido', S.std); render(); toast('Cumprimento removido'); }
   else if (a === 'conferir' || a === 'chancelar') { const [k, ev] = acharEv(v); if (!ev) return;
-    if (a === 'conferir') { ev.etapa = 'Conferida'; ev.conf = {u:eu().n, d:agora()}; log('Evidência', 'Evidência conferida', k); email('E-mail ao Autorizador: evidência aguardando chancela'); toast('Evidência conferida e enviada para chancela'); }
+    if (a === 'conferir') { ev.etapa = 'Conferida'; ev.conf = {u:eu().n, d:agora()}; log('Evidência', 'Evidência conferida', k); email('E-mail ao IBES: evidência aguardando chancela'); toast('Evidência conferida e enviada para chancela'); }
     else { ev.etapa = 'Chancelada'; ev.chan = {u:eu().n, d:agora()}; log('Evidência', 'Evidência chancelada', k); toast('Evidência chancelada'); }
     render(); }
   else if (a === 'devolver') { const [k, ev] = acharEv(v); if (!ev) return; ev.etapa = 'Devolvida'; ev.dev = {u:eu().n, d:agora(), motivo:'Documento não responde a todos os elementos avaliáveis.'}; log('Evidência', 'Evidência devolvida', k); email('E-mail ao Responsável pelo upload: evidência devolvida'); render(); toast('Evidência devolvida ao Responsável pelo upload'); }
@@ -810,9 +825,10 @@ document.addEventListener('submit', e => {
     S.pontos.push({tipo:$('#pt-tipo').value, t, u:eu().n}); log('Avaliação', 'Ponto ' + ($('#pt-tipo').value === 'forte' ? 'forte' : 'fraco') + ' registrado', 'Projeto 2025/009'); render(); toast('Ponto registrado'); }
   else if (id === 'f-res') { const dec = (document.querySelector('input[name=rs]:checked') || {}).value, niv = $('#rs-niv').value, num = $('#rs-num').value.trim(), just = $('#rs-just').value.trim(), err = $('#rs-err'), c = calc();
     if (!num) { err.textContent = 'Informe o número da resolução.'; err.hidden = false; $('#rs-num').focus(); return; }
-    const par = S.pareceres.filter(p => p.rodada === S.aval.rodada), cont = {}; par.forEach(p => cont[p.voto] = (cont[p.voto] || 0) + 1);
-    const maioria = Object.keys(cont).find(k => cont[k] > par.length / 2);
-    if (maioria && dec !== maioria && !just) { err.textContent = 'A decisão diverge da maioria dos pareceres. Escreva a justificativa.'; err.hidden = false; $('#rs-just').focus(); return; }
+    const par = S.pareceres.filter(p => p.rodada === S.aval.rodada);
+    const consenso = par.length >= QUORUM && par.every(p => p.voto === par[0].voto) ? par[0].voto : null;
+    if (!consenso) { err.textContent = 'Sem consenso entre os pareceres: a resolução fica bloqueada (pendência 34).'; err.hidden = false; return; }
+    if (dec !== consenso && !just) { err.textContent = 'A decisão diverge do consenso dos pareceres. Escreva a justificativa.'; err.hidden = false; $('#rs-just').focus(); return; }
     if (dec === 'conceder' && niv !== c.nivel && !just) { err.textContent = `O nível final (${niv}) é diferente do calculado (${c.nivel || 'abaixo de Avançado'}). Escreva a justificativa.`; err.hidden = false; $('#rs-just').focus(); return; }
     S.resols.unshift({num, d:agora(), dec, niv, just, rodada:S.aval.rodada}); S.nivelFinal = dec === 'conceder' ? niv : null;
     if (dec === 'conceder') { S.cert = {emissao:HOJE, validade:addMeses(HOJE, 60), nivel:niv}; email('E-mail ao Responsável do projeto: certificado disponível, válido até ' + br(S.cert.validade)); }

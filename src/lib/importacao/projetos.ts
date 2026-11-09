@@ -9,7 +9,7 @@ export type DocumentoExtraido = {
   id_fichero: number;
   id_proyecto: number;
   fichero_nombre: string;
-  dec_tamano: number;
+  dec_tamano: number | string;
   fec_upload: string;
   usuario_nombre: string;
   listado_evpam?: VinculoExtraido[];
@@ -34,11 +34,25 @@ export type LoteStaging = {
   }[];
 };
 
-/** Arquivo novo: até 20 MB. Imagem é recomprimida no upload. O lote histórico não passa por aqui. */
-export const LIMITE_ARQUIVO_NOVO_BYTES = 20 * 1024 * 1024;
+export { LIMITE_ARQUIVO_NOVO_BYTES } from "../documentos/regras";
 
+/** Lote histórico: o objeto fica em id_origem até o casamento por SHA-256. Arquivo novo usa caminhoVersao. */
 export function caminhoNoBucket(projetoId: string, idOrigem: string): string {
   return `projeto/${projetoId}/id_origem/${idOrigem}`;
+}
+
+/** Número puro vem em bytes. Vírgula decimal, na extração, vem em KB. */
+export function tamanhoEmBytes(valor: number | string): number {
+  if (typeof valor === "number") return valor;
+  const texto = valor.trim();
+  if (texto.includes(",")) {
+    const kb = Number(texto.replace(/\./g, "").replace(",", "."));
+    if (!Number.isFinite(kb)) throw new Error(`Tamanho inválido: ${valor}`);
+    return Math.round(kb * 1024);
+  }
+  const bytes = Number(texto);
+  if (!Number.isFinite(bytes)) throw new Error(`Tamanho inválido: ${valor}`);
+  return bytes;
 }
 
 export function interpretarDataExtracao(texto: string): string {
@@ -60,7 +74,7 @@ export function lerIndiceDocumentos(documentos: DocumentoExtraido[], idautAcsa: 
       idpryAcsa: documento.id_proyecto,
       idautAcsa,
       nome: documento.fichero_nombre,
-      tamanhoBytes: documento.dec_tamano,
+      tamanhoBytes: tamanhoEmBytes(documento.dec_tamano),
       enviadoEm: interpretarDataExtracao(documento.fec_upload),
       enviadoPor: documento.usuario_nombre,
     });
