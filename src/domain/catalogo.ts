@@ -55,3 +55,41 @@ export function catalogoFicticio(): PadraoCatalogo[] {
 export function aplicaveis(padroes: readonly PadraoCatalogo[], naoAplicaveisDiagnostico: ReadonlySet<string>): PadraoCatalogo[] {
   return padroes.filter((padrao) => !padrao.naoSeAplicaManual && !naoAplicaveisDiagnostico.has(padrao.id));
 }
+
+export type ProvaFicticia = { codigo: string; nome: string };
+
+export type RequisitoFicticio = {
+  id: string;
+  padraoId: string;
+  ordem: number;
+  texto: string;
+  provas: ProvaFicticia[];
+};
+
+/** Provas de demonstração. O nome é o tipo da prova, não um enunciado de manual. */
+export const PROVAS_FICTICIAS: readonly ProvaFicticia[] = [
+  { codigo: "DOC", nome: "Documentação" },
+  { codigo: "VIS", nome: "Visita" },
+  { codigo: "ENT", nome: "Entrevista" },
+];
+
+/** Requisitos fictícios do primeiro padrão. Visíveis só para perfis do IBES. */
+export function requisitosFicticios(): RequisitoFicticio[] {
+  const padraoId = idPadrao(1);
+  return [
+    {
+      id: "f3000001-0001-4000-8000-000000000001",
+      padraoId,
+      ordem: 1,
+      texto: "Requisito fictício de demonstração, comprovado na visita.",
+      provas: [PROVAS_FICTICIAS[0], PROVAS_FICTICIAS[1]],
+    },
+    {
+      id: "f3000001-0001-4000-8000-000000000002",
+      padraoId,
+      ordem: 2,
+      texto: "Requisito fictício de demonstração, comprovado em entrevista.",
+      provas: [PROVAS_FICTICIAS[2]],
+    },
+  ];
+}

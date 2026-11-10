@@ -14,6 +14,21 @@ import {
 } from "@/domain/rodada";
 import { slugParaCodigo } from "@/domain/slug";
 import { prazoAutoavaliacao } from "@/lib/regras/prazos";
+import {
+  AVALIACAO_2025,
+  LIMITE_USUARIOS_PADRAO,
+  ORG_MODELO,
+  RESTRICAO_SEMANAS_ANTES,
+  RESTRICAO_SEMANAS_DEPOIS,
+  type AvaliacaoRegistro,
+  type ParecerRegistro,
+  type PontoRegistro,
+  type ResolucaoRegistro,
+  type ResultadoAvaliador,
+  type StagingProjeto,
+  type UpgradeRegistro,
+  type UsuarioCliente,
+} from "@/domain/segunda";
 
 export const ID_2025_009 = "a2025009-0009-4000-8000-000000000009";
 export const ID_2023_014 = "a2023014-0014-4000-8000-000000000014";
@@ -109,6 +124,17 @@ export type EstadoDemo = {
   evidencias: EvidenciaRegistro[];
   areas: AreaRegistro[];
   emails: EmailRegistro[];
+  avaliacoes: AvaliacaoRegistro[];
+  resultadosAvaliador: ResultadoAvaliador[];
+  pontos: PontoRegistro[];
+  pareceres: ParecerRegistro[];
+  resolucoes: ResolucaoRegistro[];
+  upgrades: UpgradeRegistro[];
+  usuariosCliente: UsuarioCliente[];
+  semanasAntes: number;
+  semanasDepois: number;
+  limiteUsuarios: number;
+  staging: StagingProjeto[];
 };
 
 export type PerfilTela = {
@@ -127,7 +153,9 @@ export const PERFIS_TELA: PerfilTela[] = [
   { id: "back", canonico: "backoffice_ibes", rotulo: "Backoffice IBES", grupo: "IBES", usuarioId: USUARIO_BACKOFFICE },
   { id: "edu", canonico: "educador", rotulo: "Educador", grupo: "IBES", usuarioId: "66666666-6666-4666-8666-666666666671" },
   { id: "tutor", canonico: "tutor_relatorio", rotulo: "Tutor de relatório", grupo: "IBES", usuarioId: "66666666-6666-4666-8666-666666666672" },
-  { id: "comite", canonico: "membro_comite", rotulo: "Membro do Comitê de Certificação", grupo: "IBES", usuarioId: "66666666-6666-4666-8666-666666666664" },
+  { id: "comite", canonico: "membro_comite", rotulo: "Membro do Comitê F", grupo: "IBES", usuarioId: "66666666-6666-4666-8666-666666666664" },
+  { id: "comite-g", canonico: "membro_comite", rotulo: "Membro do Comitê G", grupo: "IBES", usuarioId: "66666666-6666-4666-8666-666666666665" },
+  { id: "comite-h", canonico: "membro_comite", rotulo: "Membro do Comitê H", grupo: "IBES", usuarioId: "66666666-6666-4666-8666-666666666666" },
   { id: "lider", canonico: "avaliador_lider", rotulo: "Avaliador líder", grupo: "IBES", usuarioId: "66666666-6666-4666-8666-666666666673" },
   { id: "aval", canonico: "avaliador_ibes", rotulo: "Avaliador", grupo: "IBES", usuarioId: "66666666-6666-4666-8666-666666666661" },
   { id: "admin", canonico: "admin_ibes", rotulo: "Administrador IBES", grupo: "IBES", usuarioId: "66666666-6666-4666-8666-666666666674" },
@@ -395,6 +423,69 @@ export function areasIniciais(): AreaRegistro[] {
   ];
 }
 
+export function avaliacaoInicial(): AvaliacaoRegistro[] {
+  return [
+    {
+      id: AVALIACAO_2025,
+      projetoId: ID_2025_009,
+      rodada: 1,
+      tipo: "certificacao",
+      resultado: "em_curso",
+      dataVisita: "2027-03-16",
+      liderId: "66666666-6666-4666-8666-666666666673",
+      resultadoPositivoEm: null,
+    },
+  ];
+}
+
+export function resultadosAvaliadorIniciais(): ResultadoAvaliador[] {
+  return [
+    {
+      id: "d1000001-0001-4000-8000-000000000001",
+      avaliacaoId: AVALIACAO_2025,
+      padraoId: idPadrao(1),
+      resultado: "cumpre",
+      observacao: "Achado fictício do avaliador.",
+    },
+  ];
+}
+
+export function pontosIniciais(): PontoRegistro[] {
+  return [
+    {
+      id: "p1000001-0001-4000-8000-000000000001",
+      avaliacaoId: AVALIACAO_2025,
+      tipo: "forte",
+      texto: "Ponto fictício consolidado da visita.",
+      autorId: "66666666-6666-4666-8666-666666666673",
+      consolidado: true,
+    },
+    {
+      id: "p1000001-0001-4000-8000-000000000002",
+      avaliacaoId: AVALIACAO_2025,
+      tipo: "fraco",
+      texto: "Ponto fictício ainda não consolidado.",
+      autorId: "66666666-6666-4666-8666-666666666661",
+      consolidado: false,
+    },
+  ];
+}
+
+export function usuariosClienteIniciais(): UsuarioCliente[] {
+  return PERFIS_TELA.filter((item) => item.grupo === "Cliente").map((item) => ({
+    id: item.usuarioId,
+    organizacaoId: ORG_MODELO,
+    nome: item.rotulo,
+    email: `${item.id}@instituicao.ficticia`,
+    perfil: item.canonico,
+    ativo: true,
+  }));
+}
+
+export function stagingInicial(): StagingProjeto[] {
+  return [{ codigo: "2025/009", instituicao: "Hospital Modelo de Demonstração", documentos: 2, vinculos: 1 }];
+}
+
 export function criarEstadoDemo(): EstadoDemo {
   return {
     projetos: projetosIniciais(),
@@ -408,6 +499,17 @@ export function criarEstadoDemo(): EstadoDemo {
     evidencias: evidenciasIniciais(),
     areas: areasIniciais(),
     emails: [],
+    avaliacoes: avaliacaoInicial(),
+    resultadosAvaliador: resultadosAvaliadorIniciais(),
+    pontos: pontosIniciais(),
+    pareceres: [],
+    resolucoes: [],
+    upgrades: [],
+    usuariosCliente: usuariosClienteIniciais(),
+    semanasAntes: RESTRICAO_SEMANAS_ANTES,
+    semanasDepois: RESTRICAO_SEMANAS_DEPOIS,
+    limiteUsuarios: LIMITE_USUARIOS_PADRAO,
+    staging: stagingInicial(),
   };
 }
 

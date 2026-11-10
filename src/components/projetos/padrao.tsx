@@ -6,6 +6,7 @@ import { ELEMENTO_FICTICIO } from "@/domain/catalogo";
 import { ROTULO_CICLO, ROTULO_FASE, acaoDaFase, rotuloAcaoArea, type Ciclo } from "@/domain/rodada";
 import { cabecalhos } from "@/components/sessao/api";
 import { usePainel } from "@/components/projetos/usePainel";
+import { useSegunda } from "@/components/projetos/useSegunda";
 
 export function ListaPadroes({ slug }: { slug: string }) {
   const { painel, erro } = usePainel(slug);
@@ -49,6 +50,7 @@ export function ListaPadroes({ slug }: { slug: string }) {
 export function FichaPadrao({ slug, padraoId, cicloInicial }: { slug: string; padraoId: string; cicloInicial: Ciclo }) {
   const [ciclo, setCiclo] = useState<Ciclo>(cicloInicial);
   const { sessao, painel, erro, aviso, setAviso, acao } = usePainel(slug, ciclo);
+  const { painel: segunda } = useSegunda(slug);
   const linha = painel?.linhas.find((item) => item.id === padraoId) ?? null;
   const evidencias = painel?.evidencias.filter((item) => item.padraoId === padraoId) ?? [];
   const areas = painel?.areas.filter((item) => item.padraoId === padraoId) ?? [];
@@ -156,6 +158,20 @@ export function FichaPadrao({ slug, padraoId, cicloInicial }: { slug: string; pa
         ) : null}
         {linha.cumpre ? <span className="chip c-C">Cumpre</span> : null}
       </form>
+      {(segunda?.requisitos ?? []).filter((item) => item.padraoId === padraoId).length > 0 ? (
+        <div className="sec" data-testid="requisitos-avaliacao">
+          <h2>Requisitos de avaliação</h2>
+          <ul>
+            {segunda?.requisitos
+              .filter((item) => item.padraoId === padraoId)
+              .map((item) => (
+                <li key={item.ordem}>
+                  {item.texto} Provas: {item.provas.join(", ")}.
+                </li>
+              ))}
+          </ul>
+        </div>
+      ) : null}
       <div className="sec">
         <h2>Evidências</h2>
         <p className="sub">Enviada, conferida, chancelada. Não há devolução.</p>

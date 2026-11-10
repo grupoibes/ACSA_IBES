@@ -56,6 +56,8 @@ export function Diagnostico({ slug }: { slug: string }) {
           <h1>Diagnóstico e escopo</h1>
           <p className="sub">
             Aplicáveis <strong data-testid="aplicaveis">{painel.aplicaveis}</strong>
+            {" · "}
+            Listados <strong data-testid="listados">{painel.linhas.length}</strong>
           </p>
         </div>
       </div>
