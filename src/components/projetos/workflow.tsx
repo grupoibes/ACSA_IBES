@@ -37,6 +37,13 @@ export function Workflow({ slug }: { slug: string }) {
       </div>
       <div className="sec">
         <h2>Prazos</h2>
+        <p className="sub" data-testid="janela-unica">
+          Autoavaliação e pedido de auditoria compartilham a janela de 12 meses a partir da abertura
+          {painel.prazos.find((linha) => linha.etapa === "Autoavaliação")
+            ? `, até ${painel.prazos.find((linha) => linha.etapa === "Autoavaliação")?.quando}`
+            : ""}
+          . A manutenção conta da certificação.
+        </p>
         <table>
           <thead>
             <tr>

@@ -1,6 +1,6 @@
 # ACSAS IBES MODERN
 
-Plataforma de acreditação do IBES. A tela em execução é o Beta v0.5: índice de projetos, projeto novo, candidaturas, ficha, biblioteca, diagnóstico, autoavaliação, ficha do padrão, áreas de melhoria e workflow. O projeto fictício `2025/009` do Hospital Modelo de Demonstração abre em `/projetos/2025-009`. Definições de padrão continuam texto fictício. O catálogo oficial entra pela importação do IBES.
+Plataforma de acreditação do IBES. A tela em execução é o Beta v0.5: índice de projetos, projeto novo, candidaturas, ficha, biblioteca, diagnóstico, autoavaliação, ficha do padrão, áreas de melhoria, workflow, avaliação, comitê, relatório, usuários, indicadores, log e migração. O projeto fictício `2025/009` do Hospital Modelo de Demonstração abre em `/projetos/2025-009`. Definições de padrão continuam texto fictício. O catálogo oficial entra pela importação do IBES.
 
 As regras do Beta v0.5 (02/11/2026) estão no motor: consenso do comitê, janela única de 12 meses e universo do projeto. O HTML do protótipo v0.5 está em `referencia/prototipo-v0.5.html`. Avaliação, comitê, relatórios, usuários, indicadores e o log ficam para a próxima rodada. A matriz de perfis já abre em Usuários, sem cadastro. Sem `ACSAS_DATABASE_URL`, a homologação usa a sessão de demonstração. Com a variável, projeto, candidatura, documento, diagnóstico, resposta, evidência, área e etapa gravam no Postgres e na auditoria.
 
@@ -26,7 +26,7 @@ npm run test:sql
 
 ## O que está nesta entrega
 
-- Emblema e fundo oficiais, cabeçalho e as telas da Prioridade 1 e da rodada 2a: índice com busca, projeto novo, candidaturas, ficha, biblioteca, diagnóstico, autoavaliação, ficha do padrão, áreas de melhoria, workflow e a matriz de perfis. O menu do que ainda não entrou aponta para a próxima rodada, sem remontar o script v0.3.
+- Emblema e fundo oficiais, cabeçalho e as telas da Prioridade 1 e das rodadas 2a e 2b: índice com busca, projeto novo, candidaturas, ficha, biblioteca, diagnóstico, autoavaliação, ficha do padrão, áreas de melhoria, workflow, avaliação, comitê, relatório, usuários, indicadores, log e migração. Atribuição por critério continua na próxima rodada, sem remontar o script v0.3.
 - Regras de nível e de permissão em `src/lib/regras`, com teste. O caso conhecido 139/142 aparece como 97,9%. Na manutenção o Grupo III sai do escopo e o nível não chega a Excelente.
 - Consenso: três pareceres com o mesmo voto. Sem consenso, `podeResolver` devolve `SEM_CONSENSO` (pendência 34).
 - Prazos: 12 meses desde a abertura para a autoavaliação e o pedido de auditoria; manutenção +30 e recertificação +60 desde a certificação.

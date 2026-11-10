@@ -172,6 +172,8 @@ Quando uma tarefa depender destes itens, implemente como **configuração** e ma
 - 30: uso do manual ME 5 1_07 após o fim do contrato com a ACSA
 - 33: composição, quórum e conflito de interesse do Comitê
 - 50: obrigatório cumprido só por área de melhoria concluída libera a saída da autoavaliação? (hoje: não)
+- 51: a restrição continua depois da visita?
+- 52: 40 usuários é limite rígido ou volume esperado?
 - Quantidade de manutenções (1 informada pelo IBES × 1 a 3 na lista de 22/10)
 
 ## 11. Como trabalhar comigo

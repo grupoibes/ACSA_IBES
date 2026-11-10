@@ -7,7 +7,9 @@ import {
   podeEnviarEvidencia,
   podeTrabalharPlano,
 } from "@/domain/chancela";
+import { hojeBrasil } from "@/domain/demo";
 import { podeLerDocumento, perfilCanonico } from "@/domain/leituraDocumento";
+import { clienteNaRestricao } from "@/domain/segunda";
 import {
   cicloValido,
   cumprePermitido,
@@ -21,6 +23,14 @@ import {
   type PainelRodada,
 } from "@/domain/rodada";
 import { ErroHttp, type Ator, type Repo } from "@/lib/persistencia/tipos";
+
+async function garantirClienteLivre(repo: Repo, projetoId: string, ator: Ator) {
+  const visita = await repo.dataVisita(projetoId);
+  const semanas = await repo.semanasRestricao();
+  if (clienteNaRestricao(hojeBrasil(), visita, ator.perfil, semanas.antes, semanas.depois)) {
+    throw new ErroHttp("O cliente só consulta durante a restrição da visita.", 403);
+  }
+}
 
 async function projetoDoSlug(repo: Repo, slug: string, ator: Ator) {
   const projeto = await repo.projetoPorSlug(slug);
@@ -64,6 +74,7 @@ export async function salvarResposta(
 ) {
   if (!cicloValido(entrada.ciclo)) throw new ErroHttp("Ciclo inválido.", 400);
   const projeto = await projetoDoSlug(repo, slug, ator);
+  await garantirClienteLivre(repo, projeto.id, ator);
   await repo.salvarResposta(
     {
       projetoId: projeto.id,
@@ -80,6 +91,7 @@ export async function salvarResposta(
 export async function enviarEvidencia(repo: Repo, slug: string, entrada: Omit<EvidenciaRegistro, "projetoId" | "etapa">, ator: Ator) {
   if (!podeEnviarEvidencia(ator.perfil)) throw new ErroHttp("Sem permissão para enviar evidência.", 403);
   const projeto = await projetoDoSlug(repo, slug, ator);
+  await garantirClienteLivre(repo, projeto.id, ator);
   await repo.enviarEvidencia({ ...entrada, projetoId: projeto.id, etapa: "enviada" }, ator);
 }
 
@@ -112,12 +124,14 @@ export async function marcarCumpre(repo: Repo, slug: string, padraoId: string, c
     areaConcluida: dados.areas.some((item) => item.padraoId === padraoId && item.fase === "concluida"),
   });
   if (recusa) throw new ErroHttp(recusa, recusa.startsWith("Somente") ? 403 : 400);
+  await garantirClienteLivre(repo, projeto.id, ator);
   await repo.marcarCumpre(projeto.id, padraoId, ciclo, ator);
 }
 
 export async function criarArea(repo: Repo, slug: string, texto: string, padraoId: string, ator: Ator) {
   if (!podeTrabalharPlano(ator.perfil)) throw new ErroHttp("Sem permissão para abrir área de melhoria.", 403);
   const projeto = await projetoDoSlug(repo, slug, ator);
+  await garantirClienteLivre(repo, projeto.id, ator);
   const area: AreaRegistro = {
     id: randomUUID(),
     projetoId: projeto.id,
@@ -136,7 +150,8 @@ export async function transitarArea(repo: Repo, slug: string, areaId: string, ac
   if (!podeExecutarAcaoArea(ator.perfil, acao)) {
     throw new ErroHttp(acao === "chancelar" ? "Sem permissão para chancelar." : "Sem permissão para esta fase.", 403);
   }
-  await projetoDoSlug(repo, slug, ator);
+  const projeto = await projetoDoSlug(repo, slug, ator);
+  await garantirClienteLivre(repo, projeto.id, ator);
   await repo.transitarArea(areaId, acao, ator);
 }
 

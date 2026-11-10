@@ -22,6 +22,7 @@ import {
   transitarEvidenciaMemoria,
   vincularEvidenciaMemoria,
 } from "@/lib/persistencia/rodadaMemoria";
+import { aplicarSegundaMemoria, lerSegundaMemoria, visitaDoEstado } from "@/lib/persistencia/segundaMemoria";
 import type { Repo } from "@/lib/persistencia/tipos";
 
 const globalDemo = globalThis as unknown as { __acsasEstado?: EstadoDemo };
@@ -45,6 +46,17 @@ export function reiniciarEstadoGlobal(): void {
   atual.evidencias.splice(0, atual.evidencias.length, ...novo.evidencias);
   atual.areas.splice(0, atual.areas.length, ...novo.areas);
   atual.emails.splice(0, atual.emails.length, ...novo.emails);
+  atual.avaliacoes.splice(0, atual.avaliacoes.length, ...novo.avaliacoes);
+  atual.resultadosAvaliador.splice(0, atual.resultadosAvaliador.length, ...novo.resultadosAvaliador);
+  atual.pontos.splice(0, atual.pontos.length, ...novo.pontos);
+  atual.pareceres.splice(0, atual.pareceres.length, ...novo.pareceres);
+  atual.resolucoes.splice(0, atual.resolucoes.length, ...novo.resolucoes);
+  atual.upgrades.splice(0, atual.upgrades.length, ...novo.upgrades);
+  atual.usuariosCliente.splice(0, atual.usuariosCliente.length, ...novo.usuariosCliente);
+  atual.staging.splice(0, atual.staging.length, ...novo.staging);
+  atual.semanasAntes = novo.semanasAntes;
+  atual.semanasDepois = novo.semanasDepois;
+  atual.limiteUsuarios = novo.limiteUsuarios;
 }
 
 export function criarRepoSessao(estado: EstadoDemo = criarEstadoDemo()): Repo {
@@ -153,6 +165,18 @@ export function criarRepoSessao(estado: EstadoDemo = criarEstadoDemo()): Repo {
     },
     async abrirComplementar(origemId) {
       return abrirComplementarMemoria(estado, origemId).id;
+    },
+    async dataVisita(projetoId) {
+      return visitaDoEstado(estado, projetoId);
+    },
+    async semanasRestricao() {
+      return { antes: estado.semanasAntes, depois: estado.semanasDepois };
+    },
+    async lerSegunda(projetoId, ator, hoje) {
+      return lerSegundaMemoria(estado, projetoId, ator, hoje);
+    },
+    async aplicarSegunda(projetoId, comando, ator) {
+      return aplicarSegundaMemoria(estado, projetoId, comando, ator);
     },
   };
 }

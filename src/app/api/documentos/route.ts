@@ -1,5 +1,7 @@
 import { NextResponse } from "next/server";
+import { hojeBrasil } from "@/domain/demo";
 import { podeEnviarBiblioteca, podeLerDocumento } from "@/domain/leituraDocumento";
+import { clienteNaRestricao } from "@/domain/segunda";
 import { responderLeitura, atorDoPedido } from "@/lib/documentos/ler";
 import { receberArquivo } from "@/lib/documentos/receber";
 import { criarStorage } from "@/lib/documentos/storage";
@@ -41,6 +43,11 @@ export async function POST(pedido: Request) {
   const membros = await repo.membros(projetoId);
   if (!podeLerDocumento({ perfil: ator.perfil, usuarioId: ator.usuarioId, projetoId, membros })) {
     return NextResponse.json({ erro: "Acesso negado a este projeto." }, { status: 403 });
+  }
+  const visita = await repo.dataVisita(projetoId);
+  const semanas = await repo.semanasRestricao();
+  if (clienteNaRestricao(hojeBrasil(), visita, ator.perfil, semanas.antes, semanas.depois)) {
+    return NextResponse.json({ erro: "O cliente só consulta durante a restrição da visita." }, { status: 403 });
   }
   const documentoId = documentoInformado || randomUUID();
   try {

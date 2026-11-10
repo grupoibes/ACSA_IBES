@@ -76,6 +76,10 @@ export type Repo = {
   transitarArea(areaId: string, acao: AcaoArea, ator: Ator): Promise<void>;
   avancarEtapa(projetoId: string, ator: Ator): Promise<void>;
   abrirComplementar(origemId: string, ator: Ator): Promise<string>;
+  dataVisita(projetoId: string): Promise<string | null>;
+  semanasRestricao(): Promise<{ antes: number; depois: number }>;
+  lerSegunda(projetoId: string, ator: Ator, hoje: string): Promise<import("@/lib/persistencia/segundaMemoria").PainelSegunda>;
+  aplicarSegunda(projetoId: string, comando: import("@/lib/persistencia/segundaMemoria").ComandoSegunda, ator: Ator): Promise<string | null>;
 };
 
 export class ErroHttp extends Error {

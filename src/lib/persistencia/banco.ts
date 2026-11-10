@@ -46,6 +46,11 @@ export const SQL_CRIAR_AREA = "select app.criar_area($1::uuid, $2::uuid, $3::uui
 export const SQL_AREA = "select app.transitar_area($1::uuid, $2)";
 export const SQL_AVANCAR = "select app.avancar_etapa($1::uuid)";
 export const SQL_COMPLEMENTAR = "select app.abrir_complementar($1::uuid) as id";
+export const SQL_VISITA = "select data_visita::text as data from avaliacoes where projeto_id = $1::uuid order by rodada desc limit 1";
+export const SQL_SEMANAS =
+  "select chave, valor from app_config where chave in ('restricao_semanas_antes', 'restricao_semanas_depois')";
+export const SQL_LER_SEGUNDA = "select app.ler_segunda($1::uuid, $2::date) as dados";
+export const SQL_APLICAR_SEGUNDA = "select app.aplicar_segunda($1::uuid, $2::jsonb) as aviso";
 
 const ETAPA: Record<string, string> = {
   rascunho: "Rascunho",
@@ -365,6 +370,25 @@ export function criarRepoBanco(banco: Banco): Repo {
       const id = texto(resultado.rows[0]?.id);
       if (!id) throw new Error("O banco não devolveu o complementar.");
       return id;
+    },
+    async dataVisita(projetoId) {
+      const resultado = await banco.transacao((query) => query(SQL_VISITA, [projetoId]));
+      return texto(resultado.rows[0]?.data) || null;
+    },
+    async semanasRestricao() {
+      const resultado = await banco.transacao((query) => query(SQL_SEMANAS));
+      const mapa = new Map(resultado.rows.map((linha) => [texto(linha.chave), Number(linha.valor)]));
+      return { antes: mapa.get("restricao_semanas_antes") ?? 5, depois: mapa.get("restricao_semanas_depois") ?? 0 };
+    },
+    async lerSegunda(projetoId, ator, hoje) {
+      const resultado = await comAtor(banco, ator, SQL_LER_SEGUNDA, [projetoId, hoje]);
+      const bruto = resultado.rows[0]?.dados;
+      return (typeof bruto === "string" ? JSON.parse(bruto) : bruto) as import("@/lib/persistencia/segundaMemoria").PainelSegunda;
+    },
+    async aplicarSegunda(projetoId, comando, ator) {
+      const resultado = await comAtor(banco, ator, SQL_APLICAR_SEGUNDA, [projetoId, JSON.stringify(comando)]);
+      const aviso = resultado.rows[0]?.aviso;
+      return aviso == null || aviso === "" ? null : String(aviso);
     },
   };
 }

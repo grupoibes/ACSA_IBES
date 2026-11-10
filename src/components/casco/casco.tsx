@@ -102,7 +102,7 @@ export function Casco({ children }: { children: ReactNode }) {
           </Link>
           <Link href="/em-breve?tela=Avaliações">Avaliações</Link>
           <Link href="/em-breve?tela=Manutenção">Manutenção</Link>
-          <Link href="/em-breve?tela=Migração ACSA">Migração ACSA</Link>
+          <Link href="/migracao">Migração ACSA</Link>
           <Link href="/em-breve?tela=Testes v0.5">Testes v0.5</Link>
         </nav>
         <div className="who">
@@ -164,8 +164,8 @@ export function Casco({ children }: { children: ReactNode }) {
             {item(`/projetos/${slug}/diagnostico`, "Diagnóstico e escopo", tela === "diagnostico")}
             {item(`/projetos/${slug}/workflow`, "Workflow e prazos", tela === "workflow")}
             {item(`/projetos/${slug}/perfis`, "Usuários", tela === "usuarios")}
-            {item(`/em-breve?tela=Indicadores&slug=${slug}`, "Indicadores", false)}
-            {item(`/em-breve?tela=Painel de log&slug=${slug}`, "Painel de log", false)}
+            {item(`/projetos/${slug}/indicadores`, "Indicadores", tela === "indicadores")}
+            {item(`/projetos/${slug}/log`, "Painel de log", tela === "log")}
             <h3>Autoavaliação</h3>
             {item(`/projetos/${slug}/autoavaliacao`, "Painel da autoavaliação", tela === "autoavaliacao")}
             {item(`/projetos/${slug}/padroes`, "Ficha de autoavaliação", tela === "padrao")}
@@ -173,8 +173,9 @@ export function Casco({ children }: { children: ReactNode }) {
             {item(`/em-breve?tela=Atribuição por critério&slug=${slug}`, "Atribuição por critério", false)}
             {item(`/projetos/${slug}/melhorias`, "Planos de ação", tela === "planos")}
             <h3>Avaliação</h3>
-            {item(`/em-breve?tela=Agendamento e relatório&slug=${slug}`, "Agendamento e relatório", false)}
-            {item(`/em-breve?tela=Comitê de Certificação&slug=${slug}`, "Comitê de Certificação", false)}
+            {item(`/projetos/${slug}/avaliacao`, "Agendamento e relatório", tela === "avaliacao")}
+            {item(`/projetos/${slug}/relatorios`, "Relatório", tela === "relatorios")}
+            {item(`/projetos/${slug}/comite`, "Comitê de Certificação", tela === "comite")}
           </nav>
         ) : null}
         <main className="main">
