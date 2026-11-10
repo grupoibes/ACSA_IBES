@@ -85,11 +85,14 @@ export async function criarProjeto(repo: Repo, entrada: EntradaCriacao, ator: At
     origem: montado.origem,
     estado: "diagnostico",
     etapa: "Diagnóstico",
+    etapaFluxo: "diagnostico",
+    ciclo: "inicial",
     prazoEtapa: prazoAutoavaliacao(montado.abertura),
     vencimento: null,
     abre: true,
     tipo: "inicial",
     origemCodigo: null,
+    origemId: null,
     selo: "Criado do zero",
   };
   registro.id = await repo.inserirProjeto(registro, ator);

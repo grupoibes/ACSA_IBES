@@ -191,6 +191,7 @@ tr.sub td:first-child{padding-left:28px;color:var(--muted)}
 .fact{display:flex;flex-wrap:wrap;gap:8px;justify-content:flex-end;align-items:center}
 .req{font-size:12px;color:var(--muted)}
 .err{font-size:13px;color:var(--bad)}
+tr.grupo-vazio td{color:var(--muted);background:var(--pend-soft)}
 .note{display:flex;gap:10px;align-items:flex-start;padding:10px 14px;border-radius:var(--radius-sm);font-size:14px}
 .note::before{content:"";flex:none;width:12px;height:2px;margin-top:10px;background:currentColor}
 .n-info{background:var(--info-soft);color:var(--info)}

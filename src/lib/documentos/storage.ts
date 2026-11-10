@@ -54,15 +54,18 @@ function storageSupabase(url: string, chave: string): StoragePort {
   };
 }
 
-let memoriaCompartilhada: StoragePort | null = null;
+const CHAVE_MEMORIA = "__acsasStorageMemoria";
+
+type GlobalComStorage = typeof globalThis & { [CHAVE_MEMORIA]?: StoragePort };
 
 /** Sem credencial, a homologação usa um único mapa no processo. Com as duas variáveis, usa o bucket documentos. */
 export function criarStorage(env: { url?: string; chave?: string } = {}): { nome: "memoria" | "supabase"; port: StoragePort } {
   if (env.url && env.chave) return { nome: "supabase", port: storageSupabase(env.url, env.chave) };
-  if (!memoriaCompartilhada) memoriaCompartilhada = storageEmMemoria();
-  return { nome: "memoria", port: memoriaCompartilhada };
+  const global = globalThis as GlobalComStorage;
+  if (!global[CHAVE_MEMORIA]) global[CHAVE_MEMORIA] = storageEmMemoria();
+  return { nome: "memoria", port: global[CHAVE_MEMORIA] };
 }
 
 export function reiniciarStorageMemoria(): void {
-  memoriaCompartilhada = null;
+  delete (globalThis as GlobalComStorage)[CHAVE_MEMORIA];
 }

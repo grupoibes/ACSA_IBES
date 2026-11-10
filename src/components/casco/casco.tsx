@@ -42,7 +42,7 @@ export function Casco({ children }: { children: ReactNode }) {
   const slug = partes[0] === "projetos" && partes[1] ? partes[1] : null;
   const codigo = codigoDoSlug(slug);
   const dentro = Boolean(codigo);
-  const tela = partes[2] === "biblioteca" ? "biblioteca" : dentro ? "ficha" : "";
+  const tela = telaDoProjeto(partes);
 
   useEffect(() => {
     const atual = lerAtor();
@@ -105,9 +105,9 @@ export function Casco({ children }: { children: ReactNode }) {
           <Link href="/em-breve?tela=Migração ACSA">Migração ACSA</Link>
           <Link href="/em-breve?tela=Testes v0.5">Testes v0.5</Link>
         </nav>
-        <label className="who" htmlFor="papel">
-          <span>Perfil (demonstração)</span>
-          <select id="papel" value={ator.id} onChange={(evento) => trocarPerfil(evento.target.value)}>
+        <div className="who">
+          <span id="papel-rotulo">Perfil (demonstração)</span>
+          <select id="papel" aria-labelledby="papel-rotulo" value={ator.id} onChange={(evento) => trocarPerfil(evento.target.value)}>
             <optgroup label="Cliente">
               {PERFIS_TELA.filter((item) => item.grupo === "Cliente").map((item) => (
                 <option key={item.id} value={item.id}>
@@ -123,7 +123,7 @@ export function Casco({ children }: { children: ReactNode }) {
               ))}
             </optgroup>
           </select>
-        </label>
+        </div>
         <button
           type="button"
           className="btn sm"
@@ -161,17 +161,17 @@ export function Casco({ children }: { children: ReactNode }) {
           <nav className="pmenu" aria-label="Menu do projeto">
             <h3>Projeto</h3>
             {item(`/projetos/${slug}`, "Ficha do projeto", tela === "ficha")}
-            {item(`/em-breve?tela=Diagnóstico e escopo&slug=${slug}`, "Diagnóstico e escopo", false)}
-            {item(`/em-breve?tela=Workflow e prazos&slug=${slug}`, "Workflow e prazos", false)}
-            {item(`/em-breve?tela=Usuários&slug=${slug}`, "Usuários", false)}
+            {item(`/projetos/${slug}/diagnostico`, "Diagnóstico e escopo", tela === "diagnostico")}
+            {item(`/projetos/${slug}/workflow`, "Workflow e prazos", tela === "workflow")}
+            {item(`/projetos/${slug}/perfis`, "Usuários", tela === "usuarios")}
             {item(`/em-breve?tela=Indicadores&slug=${slug}`, "Indicadores", false)}
             {item(`/em-breve?tela=Painel de log&slug=${slug}`, "Painel de log", false)}
             <h3>Autoavaliação</h3>
-            {item(`/em-breve?tela=Painel da autoavaliação&slug=${slug}`, "Painel da autoavaliação", false)}
-            {item(`/em-breve?tela=Ficha de autoavaliação&slug=${slug}`, "Ficha de autoavaliação", false)}
+            {item(`/projetos/${slug}/autoavaliacao`, "Painel da autoavaliação", tela === "autoavaliacao")}
+            {item(`/projetos/${slug}/padroes`, "Ficha de autoavaliação", tela === "padrao")}
             {item(`/projetos/${slug}/biblioteca`, "Biblioteca de documentos", tela === "biblioteca")}
             {item(`/em-breve?tela=Atribuição por critério&slug=${slug}`, "Atribuição por critério", false)}
-            {item(`/em-breve?tela=Planos de ação&slug=${slug}`, "Planos de ação", false)}
+            {item(`/projetos/${slug}/melhorias`, "Planos de ação", tela === "planos")}
             <h3>Avaliação</h3>
             {item(`/em-breve?tela=Agendamento e relatório&slug=${slug}`, "Agendamento e relatório", false)}
             {item(`/em-breve?tela=Comitê de Certificação&slug=${slug}`, "Comitê de Certificação", false)}
@@ -183,6 +183,14 @@ export function Casco({ children }: { children: ReactNode }) {
       </div>
     </Sessao.Provider>
   );
+}
+
+function telaDoProjeto(partes: string[]): string {
+  if (partes[0] !== "projetos" || !partes[1]) return "";
+  if (partes[2] === "padroes") return "padrao";
+  if (partes[2] === "melhorias") return "planos";
+  if (partes[2] === "perfis") return "usuarios";
+  return partes[2] ?? "ficha";
 }
 
 function codigoDoSlug(slug: string | null): string | null {

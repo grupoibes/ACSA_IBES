@@ -8,6 +8,20 @@ import {
   type ProjetoRegistro,
   type VersaoDocumento,
 } from "@/domain/demo";
+import {
+  abrirComplementarMemoria,
+  avancarEtapaMemoria,
+  criarAreaMemoria,
+  dadosDoEstado,
+  definirNaoAplicavelMemoria,
+  enviarEvidenciaMemoria,
+  marcarCumpreMemoria,
+  salvarDiagnosticoMemoria,
+  salvarRespostaMemoria,
+  transitarAreaMemoria,
+  transitarEvidenciaMemoria,
+  vincularEvidenciaMemoria,
+} from "@/lib/persistencia/rodadaMemoria";
 import type { Repo } from "@/lib/persistencia/tipos";
 
 const globalDemo = globalThis as unknown as { __acsasEstado?: EstadoDemo };
@@ -25,6 +39,12 @@ export function reiniciarEstadoGlobal(): void {
   atual.documentos.splice(0, atual.documentos.length, ...novo.documentos);
   atual.auditoria.splice(0, atual.auditoria.length, ...novo.auditoria);
   atual.membros.splice(0, atual.membros.length, ...novo.membros);
+  atual.diagnosticos.splice(0, atual.diagnosticos.length, ...novo.diagnosticos);
+  atual.naoAplicaveis.splice(0, atual.naoAplicaveis.length, ...novo.naoAplicaveis);
+  atual.respostas.splice(0, atual.respostas.length, ...novo.respostas);
+  atual.evidencias.splice(0, atual.evidencias.length, ...novo.evidencias);
+  atual.areas.splice(0, atual.areas.length, ...novo.areas);
+  atual.emails.splice(0, atual.emails.length, ...novo.emails);
 }
 
 export function criarRepoSessao(estado: EstadoDemo = criarEstadoDemo()): Repo {
@@ -97,6 +117,42 @@ export function criarRepoSessao(estado: EstadoDemo = criarEstadoDemo()): Repo {
     },
     async auditoria() {
       return [...estado.auditoria];
+    },
+    async dadosRodada(projetoId) {
+      return dadosDoEstado(estado, projetoId);
+    },
+    async salvarDiagnostico(registro) {
+      salvarDiagnosticoMemoria(estado, registro);
+    },
+    async definirNaoAplicavel(projetoId, padraoId, marcado) {
+      definirNaoAplicavelMemoria(estado, projetoId, padraoId, marcado);
+    },
+    async salvarResposta(resposta) {
+      salvarRespostaMemoria(estado, resposta);
+    },
+    async enviarEvidencia(evidencia) {
+      enviarEvidenciaMemoria(estado, evidencia);
+    },
+    async vincularEvidencia(evidenciaId, documentoId) {
+      vincularEvidenciaMemoria(estado, evidenciaId, documentoId);
+    },
+    async transitarEvidencia(evidenciaId, etapa, ator) {
+      transitarEvidenciaMemoria(estado, evidenciaId, etapa, ator.perfil);
+    },
+    async marcarCumpre(projetoId, padraoId, ciclo, ator) {
+      marcarCumpreMemoria(estado, projetoId, padraoId, ciclo, ator.perfil);
+    },
+    async criarArea(area, ator) {
+      criarAreaMemoria(estado, area, ator.perfil);
+    },
+    async transitarArea(areaId, acao, ator) {
+      transitarAreaMemoria(estado, areaId, acao, ator.perfil);
+    },
+    async avancarEtapa(projetoId, ator) {
+      avancarEtapaMemoria(estado, projetoId, ator.perfil);
+    },
+    async abrirComplementar(origemId) {
+      return abrirComplementarMemoria(estado, origemId).id;
     },
   };
 }

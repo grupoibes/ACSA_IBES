@@ -32,7 +32,8 @@ test("T21 cria o projeto, abre 2025/009 e o complementar, e recusa o código cru
   await page.screenshot({ path: "/opt/cursor/artifacts/04-ficha.png", fullPage: true });
 
   await page.getByRole("link", { name: "Diagnóstico e escopo" }).click();
-  await expect(page.getByText("entra na próxima rodada")).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Diagnóstico e escopo" })).toBeVisible();
+  await expect(page.getByText("entra na próxima rodada")).toHaveCount(0);
   await expect(page.getByText("15/12/2026")).toHaveCount(0);
 
   await page.goto("/projetos");

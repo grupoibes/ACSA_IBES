@@ -1,12 +1,29 @@
 import type { Candidatura } from "@/domain/candidatura";
+import { catalogoFicticio, idPadrao } from "@/domain/catalogo";
 import { situacaoDaLinha, type LinhaIndice } from "@/domain/indice";
 import type { MembroProjeto } from "@/domain/leituraDocumento";
+import {
+  fluxoDoEstado,
+  type AreaRegistro,
+  type Ciclo,
+  type DiagnosticoRegistro,
+  type EmailRegistro,
+  type EtapaFluxo,
+  type EvidenciaRegistro,
+  type RespostaRegistro,
+} from "@/domain/rodada";
 import { slugParaCodigo } from "@/domain/slug";
 import { prazoAutoavaliacao } from "@/lib/regras/prazos";
 
 export const ID_2025_009 = "a2025009-0009-4000-8000-000000000009";
+export const ID_2023_014 = "a2023014-0014-4000-8000-000000000014";
 export const ID_2023_014_C = "a2023014-014c-4000-8000-0000000000c1";
 export const ID_ZERO = "a2026014-0014-4000-8000-000000000014";
+export const AREA_T11 = "c1000001-0001-4000-8000-000000000001";
+export const AREA_TUTOR = "c1000002-0002-4000-8000-000000000002";
+export const AREA_RECUSA = "c1000003-0003-4000-8000-000000000003";
+export const EVIDENCIA_PENDENTE = "e1000001-0001-4000-8000-000000000001";
+export const EVIDENCIA_ORIGEM = "e1000002-0002-4000-8000-000000000002";
 export const MANUAL_ME5 = "11111111-1111-4111-8111-111111111111";
 
 export const USUARIO_RESPONSAVEL = "66666666-6666-4666-8666-666666666663";
@@ -50,11 +67,14 @@ export type ProjetoRegistro = {
   origem: OrigemCriacao;
   estado: "diagnostico" | "autoavaliacao" | "avaliacao" | "certificado";
   etapa: string;
+  etapaFluxo: EtapaFluxo;
+  ciclo: Ciclo;
   prazoEtapa: string;
   vencimento: string | null;
   abre: boolean;
   tipo: "inicial" | "complementar";
   origemCodigo: string | null;
+  origemId: string | null;
   selo: string;
 };
 
@@ -75,7 +95,7 @@ export type DocumentoRegistro = {
   versoes: VersaoDocumento[];
 };
 
-export type LinhaAuditoria = { tipo: string; acao: "insert" | "update"; objeto: string };
+export type LinhaAuditoria = { tipo: string; acao: "insert" | "update" | "delete"; objeto: string };
 
 export type EstadoDemo = {
   projetos: ProjetoRegistro[];
@@ -83,6 +103,12 @@ export type EstadoDemo = {
   documentos: DocumentoRegistro[];
   auditoria: LinhaAuditoria[];
   membros: MembroProjeto[];
+  diagnosticos: DiagnosticoRegistro[];
+  naoAplicaveis: { projetoId: string; padraoId: string }[];
+  respostas: RespostaRegistro[];
+  evidencias: EvidenciaRegistro[];
+  areas: AreaRegistro[];
+  emails: EmailRegistro[];
 };
 
 export type PerfilTela = {
@@ -111,8 +137,16 @@ export function hojeBrasil(data = new Date()): string {
   return new Intl.DateTimeFormat("en-CA", { timeZone: "America/Sao_Paulo" }).format(data);
 }
 
-function projeto(parcial: ProjetoRegistro): ProjetoRegistro {
-  return parcial;
+function projeto(
+  parcial: Omit<ProjetoRegistro, "etapaFluxo" | "ciclo" | "origemId"> &
+    Partial<Pick<ProjetoRegistro, "etapaFluxo" | "ciclo" | "origemId">>,
+): ProjetoRegistro {
+  return {
+    ...parcial,
+    etapaFluxo: parcial.etapaFluxo ?? fluxoDoEstado(parcial.estado),
+    ciclo: parcial.ciclo ?? "inicial",
+    origemId: parcial.origemId ?? null,
+  };
 }
 
 export function projetosIniciais(): ProjetoRegistro[] {
@@ -221,7 +255,7 @@ export function projetosIniciais(): ProjetoRegistro[] {
       selo: "—",
     }),
     projeto({
-      id: "a2023014-0014-4000-8000-000000000014",
+      id: ID_2023_014,
       codigo: "2023/014",
       instituicao: "Policlínica Exemplo Sul",
       unidade: "Policlínica",
@@ -258,6 +292,7 @@ export function projetosIniciais(): ProjetoRegistro[] {
       abre: true,
       tipo: "complementar",
       origemCodigo: "2023/014",
+      origemId: ID_2023_014,
       selo: "Complementar de 2023/014",
     }),
   ];
@@ -298,6 +333,68 @@ export function membrosIniciais(): MembroProjeto[] {
   ];
 }
 
+export function naoAplicaveisIniciais(): { projetoId: string; padraoId: string }[] {
+  return catalogoFicticio()
+    .filter((padrao) => padrao.grupo === "III" && !padrao.naoSeAplicaManual)
+    .map((padrao) => ({ projetoId: ID_2025_009, padraoId: padrao.id }));
+}
+
+export function evidenciasIniciais(): EvidenciaRegistro[] {
+  return [
+    {
+      id: EVIDENCIA_PENDENTE,
+      projetoId: ID_2025_009,
+      padraoId: idPadrao(1),
+      descricao: "Fato fictício enviado, ainda sem conferência.",
+      etapa: "enviada",
+      documentoIds: [],
+    },
+    {
+      id: EVIDENCIA_ORIGEM,
+      projetoId: ID_2023_014,
+      padraoId: idPadrao(1),
+      descricao: "Fato fictício registrado na origem 2023/014.",
+      etapa: "chancelada",
+      documentoIds: [],
+    },
+  ];
+}
+
+export function areasIniciais(): AreaRegistro[] {
+  return [
+    {
+      id: AREA_T11,
+      projetoId: ID_2025_009,
+      padraoId: idPadrao(2),
+      texto: "Área fictícia já planejada.",
+      fase: "planejada",
+      responsavelId: USUARIO_RESPONSAVEL,
+      inicio: "2026-10-01",
+      fim: "2026-12-01",
+    },
+    {
+      id: AREA_TUTOR,
+      projetoId: ID_2025_009,
+      padraoId: idPadrao(3),
+      texto: "Área fictícia aguardando a chancela do tutor.",
+      fase: "aguardando_chancela",
+      responsavelId: USUARIO_RESPONSAVEL,
+      inicio: "2026-09-01",
+      fim: "2026-11-01",
+    },
+    {
+      id: AREA_RECUSA,
+      projetoId: ID_2025_009,
+      padraoId: idPadrao(4),
+      texto: "Área fictícia que o autorizador não chancela.",
+      fase: "aguardando_chancela",
+      responsavelId: USUARIO_RESPONSAVEL,
+      inicio: "2026-09-15",
+      fim: "2026-11-15",
+    },
+  ];
+}
+
 export function criarEstadoDemo(): EstadoDemo {
   return {
     projetos: projetosIniciais(),
@@ -305,6 +402,12 @@ export function criarEstadoDemo(): EstadoDemo {
     documentos: [],
     auditoria: [],
     membros: membrosIniciais(),
+    diagnosticos: [],
+    naoAplicaveis: naoAplicaveisIniciais(),
+    respostas: [],
+    evidencias: evidenciasIniciais(),
+    areas: areasIniciais(),
+    emails: [],
   };
 }
 
