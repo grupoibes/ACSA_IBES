@@ -188,7 +188,7 @@ export function resumoGrupos(
 
 export type ItemSaida = { obrigatorio: boolean; aplicavel: boolean; cumpre: boolean; chancelada: boolean };
 
-/** Fechado em 28/10: sair da autoavaliação exige Cumpre e evidência chancelada em todo obrigatório aplicável. */
+/** Fechado em 28/10: sair da autoavaliação exige Cumpre e evidência chancelada em todo obrigatório aplicável. PENDÊNCIA 50: obrigatório cumprido só por área de melhoria concluída libera a saída da autoavaliação? (hoje: não). */
 export function saidaAutoavaliacaoBloqueada(itens: readonly ItemSaida[]): boolean {
   return itens.some((item) => bloqueioAutoavaliacao(item.obrigatorio && item.aplicavel, item.cumpre, item.chancelada));
 }

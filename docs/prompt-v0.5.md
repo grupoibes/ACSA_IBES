@@ -77,6 +77,7 @@ Quando a tarefa depender destes itens, deixe em configuração e marque `// PEND
 - 49: remover os apelidos `responsavel_ibes`, `gestor_instituicao` e `profissional_instituicao` depois da migração dos dados. Enquanto isso valem como Backoffice, Responsável do projeto e Conferente. `admin_ibes`, `avaliador_ibes` e `membro_comite` permanecem, porque já são nomes da matriz.
 - 47: limite e tipos do arquivo novo. Nesta versão o teto é 25 MB e a recusa cobre zip e executáveis. O lote histórico não passa por esse teto. O bucket fica com limite provisório de 500 MB.
 - 48: o código do projeto nasce sugerido e pode ser editado. Nesta versão só Administrador e Backoffice criam projeto, do zero ou a partir da candidatura. A regra continua em aberto.
+- 50: obrigatório cumprido só por área de melhoria concluída libera a saída da autoavaliação? (hoje: não)
 
 Fechadas e removidas: 2 (101 × 99 = N/A do manual), 4 (manuais extraídos) e 12 (28/10: sair da autoavaliação exige Cumpre e evidência chancelada em todo obrigatório aplicável). As pendências 23, 25, 27 e 29 do v0.3 que não foram fechadas aqui continuam abertas. A 30 deixou de travar o motor SQL em 09/11.
 

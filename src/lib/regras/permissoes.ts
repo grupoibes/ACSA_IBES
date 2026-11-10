@@ -36,7 +36,7 @@ export function podeRegistrarParecer(papel: Papel): boolean {
   return papel === "comite" || papel === "comite2";
 }
 
-/** Fechado em 28/10: o obrigatório aplicável sai da autoavaliação com Cumpre e evidência chancelada. */
+/** Fechado em 28/10: o obrigatório aplicável sai da autoavaliação com Cumpre e evidência chancelada. PENDÊNCIA 50: obrigatório cumprido só por área de melhoria concluída libera a saída da autoavaliação? (hoje: não). */
 export function bloqueioAutoavaliacao(obrigatorio: boolean, cumpre: boolean, chancelada: boolean): boolean {
   return obrigatorio && !(cumpre && chancelada);
 }
