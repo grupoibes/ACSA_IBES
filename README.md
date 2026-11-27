@@ -4,25 +4,6 @@ Plataforma de acreditação do IBES. A tela em execução é o Beta v0.5: índic
 
 As regras do Beta v0.5 (02/11/2026) estão no motor: consenso do comitê, janela única de 12 meses e universo do projeto. O HTML do protótipo v0.5 está em `referencia/prototipo-v0.5.html`. Avaliação, comitê, relatórios, usuários, indicadores e o log ficam para a próxima rodada. A matriz de perfis já abre em Usuários, sem cadastro. Sem `ACSAS_DATABASE_URL`, a homologação usa a sessão de demonstração. Com a variável, projeto, candidatura, documento, diagnóstico, resposta, evidência, área e etapa gravam no Postgres e na auditoria.
 
-## Rodar
-
-```bash
-npm install
-npm test
-npm run test:sql
-npm run test:e2e
-npm run dev
-```
-
-A aplicação sobe em [http://127.0.0.1:4317](http://127.0.0.1:4317). Na entrada, escolha um perfil de teste. Não há senha nesta homologação: o login do Supabase entra quando houver credencial.
-
-A confirmação da planilha de manual fica em [http://127.0.0.1:4317/importar-manual](http://127.0.0.1:4317/importar-manual). O botão «Baixar planilha fictícia» entrega o ME 0 0_00, com as mesmas colunas do importador. Informe os totais `01 2` e `02 1`, veja o resumo e confirme. Nesta homologação a confirmação não grava no Postgres.
-
-Para conferir o banco local:
-
-```bash
-npm run test:sql
-```
 
 ## O que está nesta entrega
 
