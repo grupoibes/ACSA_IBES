@@ -55,7 +55,7 @@ export function mimePorConteudo(bytes: Uint8Array, nome: string): string {
   return "application/octet-stream";
 }
 
-function escolher(idFichero: number, nomeOriginal: string, arquivos: ArquivoLocal[]): ArquivoLocal | null {
+function escolher(idFichero: number, nomeOriginal: string, arquivos: readonly ArquivoLocal[]): ArquivoLocal | null {
   const prefixo = `${idFichero}_`;
   const candidatos = arquivos.filter((arquivo) => arquivo.nome.startsWith(prefixo));
   if (!candidatos.length) return null;

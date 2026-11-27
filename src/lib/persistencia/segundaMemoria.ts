@@ -201,8 +201,8 @@ export function aplicarSegundaMemoria(estado: EstadoDemo, projetoId: string, com
     const ponto: PontoRegistro = {
       id: randomUUID(),
       avaliacaoId: avaliacao.id,
-      tipo: comando.tipoPonto,
-      texto: comando.texto.trim(),
+      tipo: comando.tipoPonto!,
+      texto: comando.texto!.trim(),
       autorId: ator.usuarioId ?? "",
       consolidado: false,
     };
@@ -221,7 +221,7 @@ export function aplicarSegundaMemoria(estado: EstadoDemo, projetoId: string, com
   if (comando.tipo === "rodada") {
     recusar(!podeConsolidarPontos(ator.perfil), "Somente o avaliador líder define o resultado da rodada.");
     recusar(comando.resultadoRodada !== "em_curso" && comando.resultadoRodada !== "positiva" && comando.resultadoRodada !== "negativa", "Resultado inválido.");
-    avaliacao.resultado = comando.resultadoRodada;
+    avaliacao.resultado = comando.resultadoRodada!;
     avaliacao.resultadoPositivoEm = comando.resultadoRodada === "positiva" ? hoje : comando.resultadoRodada === "em_curso" ? null : avaliacao.resultadoPositivoEm;
     if (comando.resultadoRodada === "negativa") {
       avaliacao.rodada += 1;
@@ -247,7 +247,7 @@ export function aplicarSegundaMemoria(estado: EstadoDemo, projetoId: string, com
     if (existente) {
       existente.voto = voto;
       existente.nivelProposto = nivel;
-      existente.texto = comando.texto.trim();
+      existente.texto = comando.texto!.trim();
       existente.semConflito = true;
       auditar(estado, "pareceres_comite", "update", existente.id);
     } else {
@@ -257,7 +257,7 @@ export function aplicarSegundaMemoria(estado: EstadoDemo, projetoId: string, com
         membroId,
         voto,
         nivelProposto: nivel,
-        texto: comando.texto.trim(),
+        texto: comando.texto!.trim(),
         semConflito: true,
       };
       estado.pareceres.push(criado);
@@ -287,7 +287,7 @@ export function aplicarSegundaMemoria(estado: EstadoDemo, projetoId: string, com
       id: randomUUID(),
       avaliacaoId: avaliacao.id,
       projetoId,
-      numero: comando.numero.trim(),
+      numero: comando.numero!.trim(),
       decisao,
       nivelFinal: decisao === "conceder" ? nivelFinal : null,
       justificativa: comando.justificativa ?? "",
@@ -316,8 +316,8 @@ export function aplicarSegundaMemoria(estado: EstadoDemo, projetoId: string, com
     const pedido: UpgradeRegistro = {
       id: randomUUID(),
       projetoId,
-      nivelPedido: comando.nivel,
-      motivo: comando.motivo.trim(),
+      nivelPedido: comando.nivel as NivelPedido,
+      motivo: comando.motivo!.trim(),
       situacao: "recebida",
     };
     estado.upgrades.push(pedido);
@@ -344,9 +344,9 @@ export function aplicarSegundaMemoria(estado: EstadoDemo, projetoId: string, com
     const criado: UsuarioCliente = {
       id: randomUUID(),
       organizacaoId: ORG_MODELO,
-      nome: comando.nome.trim(),
-      email: comando.email.trim(),
-      perfil: comando.perfil,
+      nome: comando.nome!.trim(),
+      email: comando.email!.trim(),
+      perfil: comando.perfil!,
       ativo: true,
     };
     estado.usuariosCliente.push(criado);
