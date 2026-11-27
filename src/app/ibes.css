@@ -95,6 +95,10 @@ svg.i{width:18px;height:18px;flex:none;fill:none;stroke:currentColor;stroke-widt
 .sec-h h2{font-size:15px;font-weight:600;color:var(--brand-700)}
 .sec-b{padding:16px}
 .sec-b.flush{padding:0}
+/* Telas das rodadas 2a/2b: .sec com h2 e conteúdo direto, sem .sec-h/.sec-b. Mesmo visual do protótipo v0.5. */
+.sec > h2:first-child{display:flex;align-items:center;min-height:44px;margin:0;padding:0 16px;font-size:15px;font-weight:600;color:var(--brand-700);background:linear-gradient(90deg,var(--brand-050),var(--surface));border-bottom:1px solid var(--line);border-radius:var(--radius) var(--radius) 0 0}
+.sec > :not(h2:first-child, .sec-h, .sec-b, .tblwrap, table){margin:16px}
+.sec > ul{padding-left:36px}
 
 /* leitura de dados */
 .kv{margin:0;display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px 24px}

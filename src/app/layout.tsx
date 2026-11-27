@@ -26,8 +26,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="pt-BR" data-theme="light">
-      <body className={`${sans.variable} ${mono.variable}`}>{children}</body>
+    <html lang="pt-BR" data-theme="light" className={`${sans.variable} ${mono.variable}`}>
+      <body>{children}</body>
     </html>
   );
 }
